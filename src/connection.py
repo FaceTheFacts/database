@@ -1,4 +1,5 @@
 import os
+
 # from dotenv import load_dotenv
 import psycopg2
 
@@ -17,8 +18,8 @@ def connect():
             database="facethefacts",
             # user=database_user,
             # password=database_password,
-            user = 'postgres',
-            password = 'password',
+            user="postgres",
+            password="password",
         )
         print("Connected to the facethefacts database")
 
@@ -27,10 +28,6 @@ def connect():
 
     finally:
         if connection is not None:
-          return connection
+            return connection
         # print("Closed the database")
         # connection.close()
-
-
-if __name__ == "__main__":
-    connect()
