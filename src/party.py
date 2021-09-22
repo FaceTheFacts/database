@@ -1,7 +1,8 @@
 from connection import connect
+import psycopg2
 
 conn = connect()
-cur = conn.cur()
+cur = conn.cursor()
 
 
 class Party:
@@ -14,12 +15,14 @@ class Party:
       full_name varchar,
       short_name varchar
     );"""
-
-        cur.execute(sql_command)
-
-        conn.commit()
-        cur.close()
-        conn.close()
+        try:
+            cur.execute(sql_command)
+            cur.close()
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            conn.close()
 
 
 party = Party()
