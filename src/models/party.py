@@ -1,10 +1,14 @@
+import sys
+
+sys.path.append("src")
 from fetch import party_fetch
 from query import Query
 
-new_query = Query()
-
 
 class Party:
+    def __init__(self):
+        self.new_query = Query()
+
     def create_table(self):
         sql_command = """CREATE TABLE party (
       id integer PRIMARY KEY,
@@ -14,12 +18,12 @@ class Party:
       full_name varchar,
       short_name varchar
     );"""
-        return new_query.sql_command_execution(sql_command)
+        return self.new_query.sql_command_execution(sql_command)
 
     def insert_data(self):
         parties = party_fetch()
         for party in parties:
-            new_query.sql_command_execution(
+            self.new_query.sql_command_execution(
                 "INSERT INTO party (id, entity_type, label, api_url, full_name, short_name) VALUES(%s,%s,%s,%s,%s,%s)",
                 (
                     party["id"],
@@ -32,9 +36,15 @@ class Party:
             )
         return
 
+    def cursor_close(self):
+        return self.new_query.cursor_close()
+
+    def connection_close(self):
+        return self.new_query.connection_close()
+
 
 party = Party()
 party.create_table()
 party.insert_data()
-new_query.cursor_close()
-new_query.connection_close()
+party.cursor_close()
+party.connection_close()
