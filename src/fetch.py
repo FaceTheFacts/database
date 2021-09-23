@@ -19,3 +19,7 @@ def party_fetch():
 
 def city_fetch():
     return fetch("cities")
+
+
+def country_fetch():
+    return fetch("countries")

@@ -9,7 +9,6 @@ class Query:
         self.cur = conn.cursor()
 
     def cursor_execute(self, query, *vars):
-
         return self.cur.execute(query, *vars)
 
     def cursor_close(self):
