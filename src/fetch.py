@@ -12,7 +12,7 @@ def fetch(url: str):
     return data
 
 
-# No Foreign key categories
+# Categories without foreign keys
 def party_fetch():
     return fetch("parties")
 
@@ -23,3 +23,8 @@ def city_fetch():
 
 def country_fetch():
     return fetch("countries")
+
+
+# Categories with Foreign Keys
+def politician_fetch():
+    return fetch("politicians")
