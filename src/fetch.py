@@ -1,15 +1,31 @@
 import requests
+import time
+import json
 
 
-def fetch(url: str):
-    BASE_URL = "https://www.abgeordnetenwatch.de/api/v2"
-    response = requests.get(f"{BASE_URL}/{url}")
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as error:
-        return error
-    data = response.json()["data"]
-    return data
+def fetch(entity: str):
+    BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}"
+    page_number = 0
+    finished = False
+    fetched_data_list = []
+    while not finished:
+        print("")
+        url = BASE_URL.format(entity=entity, page=page_number)
+        response = requests.get(url)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as error:
+            return error
+        data = response.json()["data"]
+
+        if not data:
+            finished = True
+        time.sleep(1)
+
+        fetched_data_list += data
+        page_number += 1
+    print("All data is fetched!")
+    return fetched_data_list
 
 
 # Categories without foreign keys
