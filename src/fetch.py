@@ -1,13 +1,14 @@
 import requests
 
+
 def fetch(entity: str):
-    BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&range_end={range_end}"
+    BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&pager_limit={pager_limit}"
     page_number = 0
-    range_end = 1000
+    pager_limit = 1000
     finished = False
     fetched_data_list = []
     while not finished:
-        url = BASE_URL.format(entity=entity, page=page_number, range_end=range_end)
+        url = BASE_URL.format(entity=entity, page=page_number, pager_limit=pager_limit)
         response = requests.get(url)
         try:
             response.raise_for_status()
@@ -19,6 +20,7 @@ def fetch(entity: str):
             finished = True
 
         fetched_data_list += data
+        print("Page No.{page} is fetched".format(page=page_number))
         page_number += 1
     print("All data is fetched!")
     return fetched_data_list
