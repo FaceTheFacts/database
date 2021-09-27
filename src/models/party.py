@@ -20,9 +20,9 @@ class Party:
     );"""
         return self.new_query.sql_command_execution(sql_command)
 
-    def insert_data(self):
-        parties = party_fetch()
-        for party in parties:
+    def insert_data(self) -> None:
+        party_list = party_fetch()
+        for party in party_list:
             self.new_query.sql_command_execution(
                 "INSERT INTO party (id, entity_type, label, api_url, full_name, short_name) VALUES(%s,%s,%s,%s,%s,%s)",
                 (
@@ -34,7 +34,6 @@ class Party:
                     party["short_name"],
                 ),
             )
-        return
 
     def cursor_close(self):
         return self.new_query.cursor_close()
