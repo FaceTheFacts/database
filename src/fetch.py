@@ -4,15 +4,12 @@ import json
 
 
 def fetch(entity: str):
-    BASE_URL = (
-        "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&range_end={range_end}"
-    )
+    BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&range_end={range_end}"
     page_number = 0
     range_end = 1000
     finished = False
     fetched_data_list = []
     while not finished:
-        print("")
         url = BASE_URL.format(entity=entity, page=page_number, range_end=range_end)
         response = requests.get(url)
         try:
@@ -23,7 +20,6 @@ def fetch(entity: str):
 
         if not data:
             finished = True
-        time.sleep(1)
 
         fetched_data_list += data
         page_number += 1

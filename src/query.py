@@ -8,9 +8,6 @@ class Query:
         self.conn = conn
         self.cur = conn.cursor()
 
-    def cursor_execute(self, query, *vars):
-        return self.cur.execute(query, *vars)
-
     def cursor_close(self):
         print("Cursor is closed")
         return self.cur.close()
@@ -22,9 +19,9 @@ class Query:
         print("Connection is closed")
         return self.conn.close()
 
-    def sql_command_execution(self, query, *vars):
+    def sql_command_execution(self, query: str, *value: tuple):
         try:
-            self.cursor_execute(query, *vars)
+            self.cur.execute(query, *value)
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         finally:
