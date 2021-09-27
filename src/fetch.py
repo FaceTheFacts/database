@@ -1,7 +1,4 @@
 import requests
-import time
-import json
-
 
 def fetch(entity: str):
     BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&range_end={range_end}"

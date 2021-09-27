@@ -191,7 +191,7 @@ class Politician:
 
 
 politician = Politician()
-# politician.create_table()
+politician.create_table()
 politician.insert_data()
 politician.cursor_close()
 politician.connection_close()
