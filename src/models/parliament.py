@@ -78,6 +78,25 @@ class Parliament:
 
         return
 
+    def add_new_columns(self):
+        sql_command = "ALTER TABLE {} ADD COLUMN current_project_id integer REFERENCES parliament_period(id)".format(
+            self.table_name
+        )
+        return self.new_query.sql_command_execution(sql_command)
+
+    def add_new_data(self):
+        parliaments = parliament_fetch()
+        for parliament in parliaments:
+            current_project_id = parliament["current_project"]["id"]
+            parliament_id = parliament["id"]
+            sql_command = "UPDATE {table} SET current_project_id = {current_project_id} WHERE id = {parliament_id}".format(
+                table=self.table_name,
+                current_project_id=current_project_id,
+                parliament_id=parliament_id,
+            )
+            self.new_query.sql_command_execution(sql_command)
+        return
+
     def cursor_close(self):
         return self.new_query.cursor_close()
 
@@ -86,7 +105,9 @@ class Parliament:
 
 
 parliament = Parliament()
-parliament.create_table()
-parliament.insert_data()
+# parliament.create_table()
+# parliament.insert_data()
+parliament.add_new_columns()
+parliament.add_new_data()
 parliament.cursor_close()
 parliament.connection_close()
