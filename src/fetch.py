@@ -48,5 +48,5 @@ def parliament_fetch():
     return fetch("parliaments")
 
 
-def parliament_periods_fetch():
+def parliament_period_fetch():
     return fetch("parliament-periods")

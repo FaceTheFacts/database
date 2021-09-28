@@ -1,5 +1,4 @@
 import sys
-import json
 
 sys.path.append("src")
 from fetch import parliament_fetch
