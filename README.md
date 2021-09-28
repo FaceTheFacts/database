@@ -4,6 +4,12 @@
 
 
 
+## Branch Naming Convention
+If you create a branch for features, you should name it like:
+`feature/[description]`
+If you create a branch for bugs, you should name it like:
+`bug/[description]`
+
 ## Deployment
 
 You'll need to configure the virtual environment and install dependencies.
