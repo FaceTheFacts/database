@@ -42,3 +42,11 @@ def country_fetch():
 # Categories with Foreign Keys
 def politician_fetch():
     return fetch("politicians")
+
+
+def parliament_fetch():
+    return fetch("parliaments")
+
+
+def parliament_period_fetch():
+    return fetch("parliament-periods")
