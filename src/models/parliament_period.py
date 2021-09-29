@@ -110,6 +110,23 @@ class Parliament_period:
         )
         return self.new_query.sql_command_execution(sql_command)
 
+    def update_parliament_id(self) -> None:
+        data = parliament_period_fetch()
+        for datum in data:
+            parliament = datum.get("parliament")
+            id = datum["id"]
+            if parliament is None:
+                sql_command = "UPDATE {table} SET parliament_id = {parliament} WHERE id = {id}".format(
+                    table=self.table_name, parliament=parliament, id=id
+                )
+            else:
+                sql_command = "UPDATE {table} SET parliament_id = {parliament_id} WHERE id = {id}".format(
+                    table=self.table_name, parliament_id=parliament["id"], id=id
+                )
+
+            self.new_query.sql_command_execution(sql_command)
+        return None
+
     def cursor_close(self):
         return self.new_query.cursor_close()
 
@@ -121,6 +138,6 @@ parliament_period = Parliament_period()
 # parliament_period.create_table()
 # parliament_period.insert_data()
 # parliament_period.add_new_columns()
-parliament_period.add_new_data()
+parliament_period.update_parliament_id()
 parliament_period.cursor_close()
 parliament_period.connection_close()
