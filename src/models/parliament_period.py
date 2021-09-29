@@ -100,6 +100,16 @@ class Parliament_period:
 
         return
 
+    def add_new_columns(self):
+        sql_command = """
+        ALTER TABLE {} 
+        ADD COLUMN parliament_id integer REFERENCES parliament(id),
+        ADD COLUMN previous_period_id integer REFERENCES parliament_period(id)
+        """.format(
+            self.table_name
+        )
+        return self.new_query.sql_command_execution(sql_command)
+
     def cursor_close(self):
         return self.new_query.cursor_close()
 
@@ -108,7 +118,9 @@ class Parliament_period:
 
 
 parliament_period = Parliament_period()
-parliament_period.create_table()
-parliament_period.insert_data()
+# parliament_period.create_table()
+# parliament_period.insert_data()
+# parliament_period.add_new_columns()
+parliament_period.add_new_data()
 parliament_period.cursor_close()
 parliament_period.connection_close()
