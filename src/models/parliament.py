@@ -84,7 +84,7 @@ class Parliament:
         )
         return self.new_query.sql_command_execution(sql_command)
 
-    def add_new_data(self):
+    def update_current_project_id(self):
         parliaments = parliament_fetch()
         for parliament in parliaments:
             current_project_id = parliament["current_project"]["id"]
@@ -108,6 +108,6 @@ parliament = Parliament()
 # parliament.create_table()
 # parliament.insert_data()
 parliament.add_new_columns()
-parliament.add_new_data()
+parliament.update_current_project_id()
 parliament.cursor_close()
 parliament.connection_close()
