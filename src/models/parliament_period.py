@@ -116,12 +116,33 @@ class Parliament_period:
             parliament = datum.get("parliament")
             id = datum["id"]
             if parliament is None:
-                sql_command = "UPDATE {table} SET parliament_id = {parliament} WHERE id = {id}".format(
-                    table=self.table_name, parliament=parliament, id=id
+                sql_command = (
+                    "UPDATE {table} SET parliament_id = NULL WHERE id = {id}".format(
+                        table=self.table_name, id=id
+                    )
                 )
             else:
                 sql_command = "UPDATE {table} SET parliament_id = {parliament_id} WHERE id = {id}".format(
                     table=self.table_name, parliament_id=parliament["id"], id=id
+                )
+
+            self.new_query.sql_command_execution(sql_command)
+        return None
+
+    def update_previous_period_id(self) -> None:
+        data = parliament_period_fetch()
+        for datum in data:
+            previous_period = datum.get("previous_period")
+            id = datum["id"]
+            if previous_period is None:
+                sql_command = "UPDATE {table} SET previous_period_id = NULL WHERE id = {id}".format(
+                    table=self.table_name, id=id
+                )
+            else:
+                sql_command = "UPDATE {table} SET previous_period_id = {previous_period_id} WHERE id = {id}".format(
+                    table=self.table_name,
+                    previous_period_id=previous_period["id"],
+                    id=id,
                 )
 
             self.new_query.sql_command_execution(sql_command)
@@ -135,9 +156,9 @@ class Parliament_period:
 
 
 parliament_period = Parliament_period()
-# parliament_period.create_table()
-# parliament_period.insert_data()
-# parliament_period.add_new_columns()
+parliament_period.create_table()
+parliament_period.insert_data()
 parliament_period.update_parliament_id()
+parliament_period.update_previous_period_id()
 parliament_period.cursor_close()
 parliament_period.connection_close()
