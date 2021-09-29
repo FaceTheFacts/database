@@ -32,7 +32,7 @@ class Topic:
                     topic["label"],
                     topic["api_url"],
                     topic["abgeordnetenwatch_url"],
-                    topic["description"]
+                    topic["description"],
                 ),
             )
             "Run this when you have created the table because parents relates to the topic id. Parent can be undefined, therefore we have to check it."
@@ -46,7 +46,7 @@ class Topic:
 
     def alter_table(self):
         sql_command = """ALTER topic
-      ADD COLUMN parent integer REFERENCES topic(id)""" 
+      ADD COLUMN parent integer REFERENCES topic(id)"""
         return self.new_query.sql_command_execution(sql_command)
 
     def cursor_close(self):
