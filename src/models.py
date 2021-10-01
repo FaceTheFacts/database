@@ -1,8 +1,9 @@
+import time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
-from fetch import country_fetch, city_fetch, party_fetch
+from fetch import country_fetch, city_fetch, party_fetch, politician_fetch
 
 Base = declarative_base()
 session = Session()
@@ -108,9 +109,45 @@ class Politician(Base):
     party = relationship("Party")
 
 
+def insert_politician(data: list):
+    begin = time.time()
+    data_list = []
+    for datum in data:
+        new_datum = Politician(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
+            first_name=datum["first_name"],
+            last_name=datum["last_name"],
+            birth_name=datum["birth_name"],
+            sex=datum["sex"],
+            year_of_birth=datum["year_of_birth"],
+            party_id=datum["party"]["id"] if datum["party"] else None,
+            party_past=datum["party_past"],
+            deceased=datum["deceased"],
+            deceased_date=datum["deceased_date"],
+            education=datum["education"],
+            residence=datum["residence"],
+            occupation=datum["occupation"],
+            statistic_questions=datum["statistic_questions"],
+            statistic_questions_answered=datum["statistic_questions_answered"],
+            qid_wikidata=datum["qid_wikidata"],
+            field_title=datum["field_title"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+    end = time.time()
+    print(f"Total runtime to store {len(data_list)} data is {end - begin}")
+
+
 if __name__ == "__main__":
-    # Migration
+    # Migration =>Table creation
     Base.metadata.create_all(engine)
     # insert_country(country_fetch())
     # insert_city(city_fetch())
     # insert_party(party_fetch())
+    # insert_politician(politician_fetch())
