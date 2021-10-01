@@ -1,7 +1,9 @@
 import requests
+import time
 
 
 def fetch(entity: str):
+    begin = time.time()
     BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&pager_limit={pager_limit}"
     page_number = 0
     pager_limit = 1000
@@ -23,6 +25,8 @@ def fetch(entity: str):
         print("Page No.{page} is fetched".format(page=page_number))
         page_number += 1
     print("All data is fetched!")
+    end = time.time()
+    print(f"Total runtime of fetching is {end - begin}")
     return fetched_data_list
 
 
