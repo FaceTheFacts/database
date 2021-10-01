@@ -18,16 +18,21 @@ class CountryTest(Base):
 
 
 # Migration
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
-country_one = CountryTest(
-  id =123,
-  entity_type = 'Country',
-  label = 'Germany',
-  api_url ="api/123/Germany"
-)
+# country_one = CountryTest(
+#   id =123,
+#   entity_type = 'Country',
+#   label = 'Germany',
+#   api_url ="api/123/Germany"
+# )
 
-session.add(country_one)
+# session.add(country_one)
+# session.commit()
+# session.close()
+
+#Drop Table
+CountryTest.__table__.drop(engine)
 session.commit()
 session.close()
 
