@@ -3,7 +3,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
-from fetch import country_fetch, city_fetch, party_fetch, politician_fetch
+from fetch import (
+    country_fetch,
+    city_fetch,
+    parliament_fetch,
+    parliament_period_fetch,
+    party_fetch,
+    politician_fetch,
+)
 
 Base = declarative_base()
 session = Session()
@@ -155,9 +162,31 @@ class Parliament_period(Base):
     election_date = Column(Date)
     start_date_period = Column(Date)
     end_date_period = Column(Date)
-    # parliament = Column(Integer, ForeignKey("parliament.id"))
-    # previous_period_id = Column(Integer, ForeignKey("parliament_period.id"))
-    # parliament = relationship("Parliament")
+    parliament_id = Column(Integer, ForeignKey("parliament.id"))
+    previous_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    parliament = relationship("Parliament")
+
+
+def insert_parliament_period(data: list):
+    data_list = []
+    for datum in data:
+        new_datum = Parliament_period(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
+            type=datum["type"],
+            election_date=datum["election_date"],
+            start_date_period=datum["start_date_period"],
+            end_date_period=datum["end_date_period"],
+            parliament_id=datum["parliament"]["id"] if datum["parliament"] else None,
+            # previous_period_id=datum["previous_period"]["id"] if datum["previous_period"] else None,
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
 
 
 class Parliament(Base):
@@ -172,6 +201,23 @@ class Parliament(Base):
     # parliament_period = relationship("Parliament_period")
 
 
+def insert_parliament(data: list):
+    data_list = []
+    for datum in data:
+        new_datum = Parliament(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
+            label_external_long=datum["label_external_long"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -179,3 +225,5 @@ if __name__ == "__main__":
     # insert_city(city_fetch())
     # insert_party(party_fetch())
     # insert_politician(politician_fetch())
+    insert_parliament_period(parliament_period_fetch())
+    # insert_parliament(parliament_fetch())
