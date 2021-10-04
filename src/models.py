@@ -7,6 +7,7 @@ from fetch import (
     committee_fetch,
     country_fetch,
     city_fetch,
+    fraction_fetch,
     parliament_fetch,
     parliament_period_fetch,
     party_fetch,
@@ -366,8 +367,26 @@ class Fraction(Base):
     api_url = Column(String)
     full_name = Column(String)
     short_name = Column(String)
-    legislature_id   = Column(Integer, ForeignKey("parliament_period.id"))
+    legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
+
+
+def insert_fraction(data: list) -> None:
+    data_list = []
+    for datum in data:
+        new_datum = Fraction(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            full_name=datum["full_name"],
+            short_name=datum["short_name"],
+            legislature_id=datum["legislature"]["id"] if datum["legislature"] else None,
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
 
 
 if __name__ == "__main__":
@@ -385,3 +404,4 @@ if __name__ == "__main__":
     # insert_parliament(parliament_fetch())
     # update_previous_period_id(parliament_period_fetch())
     # update_current_project_id(parliament_fetch())
+    insert_fraction(fraction_fetch())
