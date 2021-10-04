@@ -322,6 +322,22 @@ def isParliament_period():
         )
     )
 
+def insert_constituency(data):
+    data_list = []
+    for datum in data:
+        new_datum = Constituency(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            name=datum["name"],
+            number=datum["number"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
 
 if __name__ == "__main__":
     # Migration =>Table creation
@@ -335,5 +351,5 @@ if __name__ == "__main__":
     # update_previous_period_id(parliament_period_fetch())
     # update_current_project_id(parliament_fetch())
     # insert_fraction(fraction_fetch())
-    # insert_constituency(constituency_fetch())
-    isParliament_period()
+    # isParliament_period()
+    insert_constituency(constituency_fetch())
