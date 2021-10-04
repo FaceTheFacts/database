@@ -68,3 +68,7 @@ def fraction_fetch():
 
 def constituency_fetch():
     return fetch("constituencies")
+
+
+def electoral_list_fetch():
+    return fetch("electoral-lists")

@@ -8,6 +8,7 @@ from fetch import (
     constituency_fetch,
     country_fetch,
     city_fetch,
+    electoral_list_fetch,
     fraction_fetch,
     parliament_fetch,
     parliament_period_fetch,
@@ -445,6 +446,26 @@ class Electoral_list(Base):
     parliament_period = relationship("Parliament_period")
 
 
+def insert_electoral_list(data):
+    data_list = []
+    for datum in data:
+        new_datum = Electoral_list(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            name=datum["name"],
+            parliament_period_id=datum["parliament_period"]["id"]
+            if datum["parliament_period"]
+            else None,
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -463,3 +484,4 @@ if __name__ == "__main__":
     # insert_fraction(fraction_fetch())
     # isParliament_period()
     # insert_constituency(constituency_fetch())
+    insert_electoral_list(electoral_list_fetch())
