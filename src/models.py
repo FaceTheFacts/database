@@ -309,6 +309,7 @@ class Constituency(Base):
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
 
+
 def isParliament_period():
     result = 0
     data = constituency_fetch()
@@ -321,6 +322,7 @@ def isParliament_period():
             result=result, len_fetched_data=len(data)
         )
     )
+
 
 def insert_constituency(data):
     data_list = []
@@ -339,6 +341,18 @@ def insert_constituency(data):
     print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
+
+class Electoral_list(Base):
+    __tablename__ = "electoral_list"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    name = Column(String)
+    parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -352,4 +366,4 @@ if __name__ == "__main__":
     # update_current_project_id(parliament_fetch())
     # insert_fraction(fraction_fetch())
     # isParliament_period()
-    insert_constituency(constituency_fetch())
+    # insert_constituency(constituency_fetch())
