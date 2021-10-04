@@ -189,6 +189,30 @@ def insert_parliament_period(data: list):
     session.close()
 
 
+def update_previous_period_id(data: list):
+    data_list = []
+    for datum in data:
+        new_data = {
+            "id": datum["id"],
+            "previous_period_id": datum["previous_period"]["id"]
+            if datum["previous_period"]
+            else None,
+        }
+        data_list.append(new_data)
+
+    for data_dict in data_list:
+        if data_dict["previous_period_id"] != None:
+            engine.execute(
+                "UPDATE {table} SET previous_period_id = {previous_period_id} WHERE id = {id}".format(
+                    table=Parliament_period.__tablename__,
+                    previous_period_id=data_dict["previous_period_id"],
+                    id=data_dict["id"],
+                )
+            )
+    session.commit()
+    session.close()
+
+
 class Parliament(Base):
     __tablename__ = "parliament"
     id = Column(Integer(), primary_key=True)
@@ -225,5 +249,6 @@ if __name__ == "__main__":
     # insert_city(city_fetch())
     # insert_party(party_fetch())
     # insert_politician(politician_fetch())
-    insert_parliament_period(parliament_period_fetch())
+    # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
+    update_previous_period_id(parliament_period_fetch())
