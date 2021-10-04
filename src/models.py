@@ -415,4 +415,4 @@ class Constituency(Base):
     # insert_parliament(parliament_fetch())
     # update_previous_period_id(parliament_period_fetch())
     # update_current_project_id(parliament_fetch())
-    insert_fraction(fraction_fetch())
+    # insert_fraction(fraction_fetch())
