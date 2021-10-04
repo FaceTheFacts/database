@@ -266,6 +266,18 @@ def update_current_project_id(data: list):
     session.close()
 
 
+class Fraction(Base):
+    __tablename__ = "fraction"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    full_name = Column(String)
+    short_name = Column(String)
+    legislature_id   = Column(Integer, ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -276,4 +288,4 @@ if __name__ == "__main__":
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
     # update_previous_period_id(parliament_period_fetch())
-    update_current_project_id(parliament_fetch())
+    # update_current_project_id(parliament_fetch())
