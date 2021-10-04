@@ -389,7 +389,18 @@ def insert_fraction(data: list) -> None:
     session.close()
 
 
-if __name__ == "__main__":
+class Constituency(Base):
+    __tablename__ = "constituency"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    name = Column(String)
+    number = Column(Integer)
+    parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period")
+
+    # if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
     #Topic.insert_topic(topic_fetch())
