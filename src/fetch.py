@@ -62,3 +62,7 @@ def parliament_period_fetch():
 
 def fraction_fetch():
     return fetch("fractions")
+
+
+def constituency_fetch():
+    return fetch("constituencies")
