@@ -358,6 +358,18 @@ class Committee_has_topic(Base):
         session.commit()
         session.close()
 
+class Fraction(Base):
+    __tablename__ = "fraction"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    full_name = Column(String)
+    short_name = Column(String)
+    legislature_id   = Column(Integer, ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
