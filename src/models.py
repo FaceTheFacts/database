@@ -242,6 +242,30 @@ def insert_parliament(data: list):
     session.close()
 
 
+def update_current_project_id(data: list):
+    data_list = []
+    for datum in data:
+        new_data = {
+            "id": datum["id"],
+            "current_project_id": datum["current_project"]["id"]
+            if datum["current_project"]
+            else None,
+        }
+        data_list.append(new_data)
+
+    for data_dict in data_list:
+        if data_dict["current_project_id"] != None:
+            engine.execute(
+                "UPDATE {table} SET current_project_id = {current_project_id} WHERE id = {id}".format(
+                    table=Parliament.__tablename__,
+                    current_project_id=data_dict["current_project_id"],
+                    id=data_dict["id"],
+                )
+            )
+    session.commit()
+    session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -251,4 +275,5 @@ if __name__ == "__main__":
     # insert_politician(politician_fetch())
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
-    update_previous_period_id(parliament_period_fetch())
+    # update_previous_period_id(parliament_period_fetch())
+    update_current_project_id(parliament_fetch())
