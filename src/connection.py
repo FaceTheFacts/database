@@ -1,30 +1,21 @@
 import os
-
 from dotenv import load_dotenv
-import psycopg2
+import sqlalchemy as sa
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
+load_dotenv()
+database_user = os.getenv("DATABASE_USER")
+database_host = os.getenv("DATABASE_HOST")
+database_password = os.getenv("DATABASE_PASSWORD")
 
-def connect():
-    connection = None
-    try:
-        print("Connecting to the postgreSQL ...")
+connection_uri = sa.engine.URL.create(
+    "postgresql+psycopg2",
+    username=database_user,
+    password=database_password,
+    host=database_host,
+    database="facethefacts",
+)
 
-        load_dotenv()
-        database_host = os.getenv("DATABASE_HOST")
-        database_user = os.getenv("DATABASE_USER")
-        database_password = os.getenv("DATABASE_PASSWORD")
-
-        connection = psycopg2.connect(
-            host=database_host,
-            database="facethefacts",
-            user=database_user,
-            password=database_password,
-        )
-        print("Connected to the facethefacts database")
-
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-
-    finally:
-        if connection is not None:
-            return connection
+engine = create_engine(connection_uri)
+Session = sessionmaker(bind=engine)
