@@ -5,6 +5,7 @@ from sqlalchemy.orm import session, relationship
 from connection import Session, engine
 from fetch import (
     committee_fetch,
+    constituency_fetch,
     country_fetch,
     city_fetch,
     fraction_fetch,
@@ -400,7 +401,21 @@ class Constituency(Base):
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
 
-    # if __name__ == "__main__":
+def isParliament_period():
+    result = 0
+    data = constituency_fetch()
+    for datum in data:
+        paliament_period = datum.get("paliament_period")
+        if paliament_period:
+            result += 1
+    print(
+        "Constituency included {result} 'paliament_period' in total out of {len_fetched_data} data".format(
+            result=result, len_fetched_data=len(data)
+        )
+    )
+
+
+if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
     #Topic.insert_topic(topic_fetch())
@@ -416,3 +431,5 @@ class Constituency(Base):
     # update_previous_period_id(parliament_period_fetch())
     # update_current_project_id(parliament_fetch())
     # insert_fraction(fraction_fetch())
+    # insert_constituency(constituency_fetch())
+    isParliament_period()
