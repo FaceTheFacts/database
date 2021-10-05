@@ -265,16 +265,16 @@ def update_current_project_id(data: list):
     session.commit()
     session.close()
 
-class Topic: 
+class Topic(Base):
     __tablename__ = "topic"
-    id = Column(Integer(), primary_key=True)
+    id = Column(Integer, primary_key=True)
     entity_type = Column(String)
     label = Column(String)
     api_url = Column(String)
     abgeordnetenwatch_url = Column(String)
     description = Column(String)
-    # parent_id = Column(Integer, ForeignKey("topic.id"))
-    # topic = relationship("Topic") 
+    # parent_id = Column(Integer(), ForeignKey("topic.id"))
+    # committee = relationship('Committee', secondary = 'committee_has_topic') 
 
     def insert_topic(data: list):
         data_list = []
@@ -311,6 +311,55 @@ class Topic:
                         id=data_list_item["id"]
                     )
                 )
+
+class Committee(Base):
+    __tablename__ = "committee"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    field_legislature_id = Column(Integer(), ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period")
+    #topic = relationship('Topic', secondary = "committee_has_topic")
+    
+    def insert_committee(data: list):
+        data_list = []
+        for datum in data:
+            new_data = Committee(
+                id = datum["id"],
+                entity_type = datum["entity_type"],
+                label = datum["label"],
+                api_url= datum["api_url"],
+                field_legislature_id = datum["field_legislature"]["id"]
+            )
+            data_list.append(new_data)
+        session.add_all(data_list)
+        session.commit()
+        session.close()
+
+class Committee_has_topic(Base):
+    __tablename__ = "committee_has_topic"
+    id = Column(Integer(), primary_key=True)
+    committee_id = Column(Integer(), ForeignKey("committee.id"))
+    topics_id = Column(Integer(), ForeignKey("topic.id"))
+    committee = relationship("Committee")
+    topic = relationship("Topic")
+
+    def insert_committee_has_topic(data: list):
+        data_list = []
+        i = 0
+        for datum in data:
+            for topic in datum["field_topics"]:
+                new_data = Committee_has_topic(
+                    id = i,
+                    committee_id = datum["id"],
+                    topics_id = topic["id"]
+                )
+                data_list.append(new_data)
+                i = i+1
+        session.add_all(data_list)
+        session.commit()
+        session.close() 
 
 if __name__ == "__main__":
     # Migration =>Table creation
