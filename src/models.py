@@ -4,12 +4,14 @@ from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
 from fetch import (
+    committee_fetch,
     country_fetch,
     city_fetch,
     parliament_fetch,
     parliament_period_fetch,
     party_fetch,
     politician_fetch,
+    topic_fetch,
 )
 
 Base = declarative_base()
@@ -265,10 +267,104 @@ def update_current_project_id(data: list):
     session.commit()
     session.close()
 
+class Topic(Base):
+    __tablename__ = "topic"
+    id = Column(Integer, primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    abgeordnetenwatch_url = Column(String)
+    description = Column(String)
+    parent_id = Column(Integer(), ForeignKey("topic.id"))
+    committees = relationship('Committee', secondary='committee_has_topic', back_populates="topics") 
+
+    def insert_topic(data: list):
+        data_list = []
+        for datum in data:
+            new_data = Topic(
+                id = datum["id"],
+                entity_type = datum["entity_type"],
+                label = datum["label"],
+                api_url= datum["api_url"],
+                abgeordnetenwatch_url = datum["abgeordnetenwatch_url"],
+                description = datum["description"],
+            )
+            data_list.append(new_data)
+        session.add_all(data_list)
+        session.commit()
+        session.close()
+
+    def update_parent_id(data: list):
+        data_list = []
+        for datum in data:
+            new_data = {
+                "id": datum["id"],
+                "parent_id": datum["parent"][0]["id"]
+                if datum["parent"]
+                else None,
+            }
+            data_list.append(new_data)
+        for data_list_item in data_list:
+            if data_list_item["parent_id"] != None:
+                engine.execute(
+                    "UPDATE {table} SET parent_id = {parent_id} WHERE id = {id}".format(
+                        table=Topic.__tablename__,
+                        parent_id=data_list_item["parent_id"],
+                        id=data_list_item["id"]
+                    )
+                )
+
+class Committee(Base):
+    __tablename__ = "committee"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    field_legislature_id = Column(Integer(), ForeignKey("parliament_period.id"))
+    parliament_period = relationship("Parliament_period", backref="parliament_period")
+    topics = relationship('Topic', secondary="committee_has_topic", back_populates="committees")
+    
+    def insert_committee(data: list):
+        data_list = []
+        for datum in data:
+            new_data = Committee(
+                id = datum["id"],
+                entity_type = datum["entity_type"],
+                label = datum["label"],
+                api_url= datum["api_url"],
+                field_legislature_id = datum["field_legislature"]["id"]
+            )
+            data_list.append(new_data)
+        session.add_all(data_list)
+        session.commit()
+        session.close()
+
+class Committee_has_topic(Base):
+    __tablename__ = "committee_has_topic"
+    committee_id = Column(Integer(), ForeignKey("committee.id"), primary_key=True)
+    topic_id = Column(Integer(), ForeignKey("topic.id"), primary_key=True)
+
+    def insert_committee_has_topic(data: list):
+        data_list = []
+        for datum in data:
+            if datum["field_topics"]:
+                for topic in datum["field_topics"]:
+                    new_data = Committee_has_topic(
+                    committee_id = datum["id"],
+                    topic_id = topic["id"]
+                )
+                    data_list.append(new_data)
+        session.add_all(data_list)
+        session.commit()
+        session.close()
 
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
+    #Topic.insert_topic(topic_fetch())
+    #Topic.update_parent_id(topic_fetch())
+    #Committee.insert_committee(committee_fetch())
+    #Committee_has_topic.insert_committee_has_topic(committee_fetch())
     # insert_country(country_fetch())
     # insert_city(city_fetch())
     # insert_party(party_fetch())
@@ -276,4 +372,4 @@ if __name__ == "__main__":
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
     # update_previous_period_id(parliament_period_fetch())
-    update_current_project_id(parliament_fetch())
+    # update_current_project_id(parliament_fetch())

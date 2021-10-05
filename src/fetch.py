@@ -51,6 +51,8 @@ def topic_fetch():
 def politician_fetch():
     return fetch("politicians")
 
+def committee_fetch():
+    return fetch("committees")
 
 def parliament_fetch():
     return fetch("parliaments")
