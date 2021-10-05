@@ -8,6 +8,7 @@ from fetch import (
     constituency_fetch,
     country_fetch,
     city_fetch,
+    election_program_fetch,
     electoral_list_fetch,
     fraction_fetch,
     parliament_fetch,
@@ -466,6 +467,20 @@ def insert_electoral_list(data):
     session.close()
 
 
+def link_length_checker_election_program():
+    data_list = []
+    data = election_program_fetch()
+    length_of_data = len(data)
+    for datum in data:
+        link = datum["link"]
+        length_of_link = len(link)
+        if length_of_link != 1:
+            data_list.append(datum)
+
+    print("Fetched {} data in total".format(length_of_data))
+    print("{} has multiple links".format(data_list))
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -484,4 +499,5 @@ if __name__ == "__main__":
     # insert_fraction(fraction_fetch())
     # isParliament_period()
     # insert_constituency(constituency_fetch())
-    insert_electoral_list(electoral_list_fetch())
+    # insert_electoral_list(electoral_list_fetch())
+    link_length_checker_election_program()
