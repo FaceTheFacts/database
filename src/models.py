@@ -496,6 +496,21 @@ def link_checker_election_program():
     print("Fetched {} data in total".format(length_of_data))
     print("{} in total have uris".format(len(data_list)))
 
+class Election_program(Base):
+    __tablename__ = "election_program"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    party_id = Column(Integer, ForeignKey("party.id"))
+    link_uri = Column(String)
+    link_title = Column(String)
+    link_option = Column(String)
+    file = Column(String)
+    parliament_period = relationship("Parliament_period")
+    Party = relationship("Party")
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -516,4 +531,4 @@ if __name__ == "__main__":
     # insert_constituency(constituency_fetch())
     # insert_electoral_list(electoral_list_fetch())
     # link_length_checker_election_program()
-    link_checker_election_program()
+    # link_checker_election_program()
