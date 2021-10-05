@@ -389,6 +389,21 @@ def link_length_checker_election_program():
     print("{} has multiple links".format(data_list))
 
 
+
+def link_checker_election_program():
+    data_list = []
+    data = election_program_fetch()
+    length_of_data = len(data)
+    for datum in data:
+        id = datum["id"]
+        link = datum["link"]
+        uri = link[0]["uri"]
+        if uri != None:
+            hasUrl = {"id": id, "uri": uri}
+            data_list.append(hasUrl)
+    print("Fetched {} data in total".format(length_of_data))
+    print("{} in total have uris".format(len(data_list)))
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -404,4 +419,5 @@ if __name__ == "__main__":
     # isParliament_period()
     # insert_constituency(constituency_fetch())
     # insert_electoral_list(electoral_list_fetch())
-    link_length_checker_election_program()
+    # link_length_checker_election_program()
+    link_checker_election_program()
