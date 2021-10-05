@@ -481,7 +481,6 @@ def link_length_checker_election_program():
     print("{} has multiple links".format(data_list))
 
 
-
 def link_checker_election_program():
     data_list = []
     data = election_program_fetch()
@@ -495,6 +494,7 @@ def link_checker_election_program():
             data_list.append(hasUrl)
     print("Fetched {} data in total".format(length_of_data))
     print("{} in total have uris".format(len(data_list)))
+
 
 class Election_program(Base):
     __tablename__ = "election_program"
@@ -510,6 +510,32 @@ class Election_program(Base):
     file = Column(String)
     parliament_period = relationship("Parliament_period")
     Party = relationship("Party")
+
+
+def insert_election_program(data):
+    data_list = []
+    for datum in data:
+        link = datum["link"][0]
+        new_datum = Election_program(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            parliament_period_id=datum["parliament_period"]["id"]
+            if datum["parliament_period"]
+            else None,
+            party_id=datum["party"]["id"] if datum["party"] else None,
+            link_uri=link["uri"],
+            link_title=link["title"],
+            link_option=link["option"] if link.get("option") else None,
+            file=datum["file"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
+
 
 if __name__ == "__main__":
     # Migration =>Table creation
@@ -532,3 +558,4 @@ if __name__ == "__main__":
     # insert_electoral_list(electoral_list_fetch())
     # link_length_checker_election_program()
     # link_checker_election_program()
+    insert_election_program(election_program_fetch())
