@@ -280,6 +280,7 @@ class Fraction(Base):
     short_name = Column(String)
     legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
+    fraction_membership = relationship("Fraction_member", back_populates="fraction")
 
 
 def insert_fraction(data: list) -> None:
@@ -445,6 +446,15 @@ def insert_election_program(data):
     session.close()
 
 
+class Fraction_membership(Base):
+    __tablename__ = "fraction_membership"
+    id = Column(Integer, primary_key=True)
+    fraction_id = Column(Integer, ForeignKey("fraction.id"))
+    valid_from = Column(String)
+    valid_until = Column(String)
+    fraction = relationship("Fraction", back_populates="fraction_membership")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
@@ -462,4 +472,4 @@ if __name__ == "__main__":
     # insert_electoral_list(electoral_list_fetch())
     # link_length_checker_election_program()
     # link_checker_election_program()
-    insert_election_program(election_program_fetch())
+    # insert_election_program(election_program_fetch())
