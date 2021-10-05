@@ -2,3 +2,5 @@
 src/__pycache__
 venv
 .venv
+alembic/__pycache__
+alembic/versions/__pycache__
