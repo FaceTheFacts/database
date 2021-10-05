@@ -265,6 +265,52 @@ def update_current_project_id(data: list):
     session.commit()
     session.close()
 
+class Topic: 
+    __tablename__ = "topic"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    abgeordnetenwatch_url = Column(String)
+    description = Column(String)
+    # parent_id = Column(Integer, ForeignKey("topic.id"))
+    # topic = relationship("Topic") 
+
+    def insert_topic(data: list):
+        data_list = []
+        for datum in data:
+            new_data = Topic(
+                id = datum["id"],
+                entity_type = datum["entity_type"],
+                label = datum["label"],
+                api_url= datum["api_url"],
+                abgeordnetenwatch_url = datum["abgeordnetenwatch_url"],
+                description = datum["description"],
+            )
+            data_list.append(new_data)
+        session.add_all(data_list)
+        session.commit()
+        session.close()
+
+    def update_parent_id(data: list):
+        data_list = []
+        for datum in data:
+            new_data = {
+                "id": datum["id"],
+                "parent_id": datum["parent"]["id"]
+                if datum["parent"]
+                else None,
+            }
+            data_list.append(new_data)
+        for data_list_item in data_list:
+            if data_list_item["parent_id"] != None:
+                engine.execute(
+                    "UPDATE {table} SET parent_id = {parent_id} WHERE id = {id}".format(
+                        table=Topic.__tablename__,
+                        parent_id=data_list_item["parent_id"],
+                        id=data_list_item["id"]
+                    )
+                )
 
 if __name__ == "__main__":
     # Migration =>Table creation
