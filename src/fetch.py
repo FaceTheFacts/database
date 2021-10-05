@@ -70,3 +70,7 @@ def constituency_fetch():
 
 def electoral_list_fetch():
     return fetch("electoral-lists")
+
+
+def election_program_fetch():
+    return fetch("election-program")
