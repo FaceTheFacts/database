@@ -27,6 +27,7 @@ from fetch import (
     politician_fetch,
     topic_fetch,
 )
+import json
 
 import sys
 
@@ -331,6 +332,8 @@ class Topic(Base):
         secondary="sidejob_has_topic",
         back_populates="topics",
     )
+    committees = relationship('Committee', secondary='committee_has_topic', back_populates="topics")
+    position_statements = relationship("PositionStatement", back_populates="topics") 
 
     def insert_topic(data: list):
         data_list = []
@@ -1159,8 +1162,47 @@ def populate_sidejob_has_topic():
     session.commit()
     session.close()
 
+class PositionStatement(Base):
+    __tablename__= "position_statement"
+    # id has the following structure parliament_period + statement_number (130 + 1 -> 1301) 
+    id = Column(Integer(), primary_key=True)
+    statement = Column(String)
+    topic_id = Column(Integer, ForeignKey("topic.id"))
+    topics = relationship("Topic", back_populates="position_statements")
+
+    def insert_position_statement():
+        data_list=[]
+        # parliament period needs to match the assumptions of the state
+        parliament_period="130"
+        # add json file with the assumptions to the src directory
+        file = "src/mecklenburg-vorpommern-assumptions.json"
+        with open(file) as f:
+            data = json.load(f)
+            for assumption in data:
+                i = parliament_period + str(assumption["number"])
+                newData = PositionStatement( 
+                    id = int(i),
+                    statement = assumption["text"],
+                    topic_id = assumption["topic"])
+                data_list.append(newData)
+            session.add_all(data_list)
+            session.commit()
+            session.close() 
 
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
     populate_vote()
+    PositionStatement.insert_position_statement()
+    #Topic.insert_topic(topic_fetch())
+    #Topic.update_parent_id(topic_fetch())
+    #Committee.insert_committee(committee_fetch())
+    #Committee_has_topic.insert_committee_has_topic(committee_fetch())
+    # insert_country(country_fetch())
+    # insert_city(city_fetch())
+    # insert_party(party_fetch())
+    # insert_politician(politician_fetch())
+    # insert_parliament_period(parliament_period_fetch())
+    # insert_parliament(parliament_fetch())
+    # update_previous_period_id(parliament_period_fetch())
+    # update_current_project_id(parliament_fetch())
