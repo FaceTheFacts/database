@@ -235,7 +235,6 @@ def populate_parliament_periods() -> None:
     session.close()
 
 
-
 class Parliament(Base):
     __tablename__ = "parliament"
     id = Column(Integer(), primary_key=True)
@@ -244,49 +243,31 @@ class Parliament(Base):
     api_url = Column(String)
     abgeordnetenwatch_url = Column(String)
     label_external_long = Column(String)
-    # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
-    # parliament_period = relationship("ParliamentPeriod")
+    current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
 
 
-def insert_parliament(data: list):
-    data_list = []
-    for datum in data:
-        new_datum = Parliament(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-            label_external_long=datum["label_external_long"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
-    session.commit()
-    session.close()
-
-
-def update_current_project_id(data: list):
-    data_list = []
-    for datum in data:
-        new_data = {
-            "id": datum["id"],
-            "current_project_id": datum["current_project"]["id"]
-            if datum["current_project"]
-            else None,
-        }
-        data_list.append(new_data)
-
-    for data_dict in data_list:
-        if data_dict["current_project_id"] != None:
-            engine.execute(
-                "UPDATE {table} SET current_project_id = {current_project_id} WHERE id = {id}".format(
-                    table=Parliament.__tablename__,
-                    current_project_id=data_dict["current_project_id"],
-                    id=data_dict["id"],
-                )
+def populate_parliaments() -> None:
+    api_parliaments = fetch_entity("parliaments")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Parliament(
+                id=api_parliament["id"],
+                entity_type=api_parliament["entity_type"],
+                label=api_parliament["label"],
+                api_url=api_parliament["api_url"],
+                abgeordnetenwatch_url=api_parliament["abgeordnetenwatch_url"],
+                label_external_long=api_parliament["label_external_long"],
+                current_project_id=api_parliament["current_project"]["id"]
+                if api_parliament["current_project"]
+                else None,
             )
+            for api_parliament in api_parliaments
+        ]
+    )
     session.commit()
     session.close()
+
 
 
 class Fraction(Base):
@@ -612,8 +593,7 @@ if __name__ == "__main__":
     # populate_parties()
     # populate_politicians()
     # populate_parliament_periods()
-    # insert_parliament(parliament_fetch())
-    # update_current_project_id(parliament_fetch())
+    # populate_parliaments()
     # insert_fraction(fraction_fetch())
     # isParliament_period()
     # insert_constituency(constituency_fetch())
