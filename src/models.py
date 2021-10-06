@@ -314,39 +314,29 @@ class Constituency(Base):
     name = Column(String)
     number = Column(Integer)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
-    parliament_period = relationship("ParliamentPeriod")
     electoral_data = relationship("Electoral_data", back_populates="constituency")
 
 
-def isParliament_period():
-    result = 0
-    data = constituency_fetch()
-    for datum in data:
-        paliament_period = datum.get("paliament_period")
-        if paliament_period:
-            result += 1
-    print(
-        "Constituency included {result} 'paliament_period' in total out of {len_fetched_data} data".format(
-            result=result, len_fetched_data=len(data)
-        )
+def populate_constituencies():
+    api_constituencies = fetch_entity("constituencies")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Constituency(
+                id=api_constituency["id"],
+                entity_type=api_constituency["entity_type"],
+                label=api_constituency["label"],
+                api_url=api_constituency["api_url"],
+                name=api_constituency["name"],
+                number=api_constituency["number"],
+                parliament_period_id=api_constituency["parliament_period"]["id"]
+                if api_constituency["parliament_period"]
+                else None,
+            )
+            for api_constituency in api_constituencies
+        ]
     )
-
-
-def insert_constituency(data):
-    data_list = []
-    for datum in data:
-        new_datum = Constituency(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            name=datum["name"],
-            number=datum["number"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -599,8 +589,7 @@ if __name__ == "__main__":
     # populate_parliament_periods()
     # populate_parliaments()
     # populate_fractions()
-    # isParliament_period()
-    # insert_constituency(constituency_fetch())
+    # populate_constituencies()
     # insert_electoral_list(electoral_list_fetch())
     # link_length_checker_election_program()
     # link_checker_election_program()
