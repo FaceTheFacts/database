@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey, Float
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
-from fetch import election_program_fetch,
+from fetch import election_program_fetch
 from fetch import fetch_entity
 
 import sys
