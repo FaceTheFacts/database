@@ -352,23 +352,25 @@ class ElectoralList(Base):
     electoral_data = relationship("Electoral_data", back_populates="electoral_list")
 
 
-def insert_electoral_list(data):
-    data_list = []
-    for datum in data:
-        new_datum = ElectoralList(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            name=datum["name"],
-            parliament_period_id=datum["parliament_period"]["id"]
-            if datum["parliament_period"]
-            else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_electoral_lists():
+    api_electoral_lists = fetch_entity("electoral-lists")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            ElectoralList(
+                id=api_electoral_list["id"],
+                entity_type=api_electoral_list["entity_type"],
+                label=api_electoral_list["label"],
+                api_url=api_electoral_list["api_url"],
+                name=api_electoral_list["name"],
+                parliament_period_id=api_electoral_list["parliament_period"]["id"]
+                if api_electoral_list["parliament_period"]
+                else None,
+            )
+            for api_electoral_list in api_electoral_lists
+        ]
+    )
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -590,7 +592,7 @@ if __name__ == "__main__":
     # populate_parliaments()
     # populate_fractions()
     # populate_constituencies()
-    # insert_electoral_list(electoral_list_fetch())
+    # populate_electoral_lists()
     # link_length_checker_election_program()
     # link_checker_election_program()
     # insert_election_program(election_program_fetch())
