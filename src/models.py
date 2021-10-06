@@ -403,7 +403,7 @@ def link_checker_election_program():
     print("{} in total have uris".format(len(data_list)))
 
 
-class Election_program(Base):
+class ElectionProgram(Base):
     __tablename__ = "election_program"
     id = Column(Integer(), primary_key=True)
     entity_type = Column(String)
@@ -423,7 +423,7 @@ def insert_election_program(data):
     data_list = []
     for datum in data:
         link = datum["link"][0]
-        new_datum = Election_program(
+        new_datum = ElectionProgram(
             id=datum["id"],
             entity_type=datum["entity_type"],
             label=datum["label"],
