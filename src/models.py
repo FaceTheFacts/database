@@ -180,7 +180,9 @@ def populate_politicians() -> None:
     session.commit()
     session.close()
     time_end = time.time()
-    print(f"Total runtime to store {len(api_politicians)} rows for politicians is {time_end - time_begin}")
+    print(
+        f"Total runtime to store {len(api_politicians)} rows for politicians is {time_end - time_begin}"
+    )
 
 
 class ParliamentPeriod(Base):
@@ -201,6 +203,32 @@ class ParliamentPeriod(Base):
     candidacy_mandates = relationship(
         "Candidacy_mandate", back_populates="parliament_period"
     )
+
+
+def populate_parliament_periods() -> None:
+    api_parliament_periods = fetch_entity("parliament-periods")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            ParliamentPeriod(
+                id=api_parliament_period["id"],
+                entity_type=api_parliament_period["entity_type"],
+                label=api_parliament_period["label"],
+                api_url=api_parliament_period["api_url"],
+                abgeordnetenwatch_url=api_parliament_period["abgeordnetenwatch_url"],
+                type=api_parliament_period["type"],
+                election_date=api_parliament_period["election_date"],
+                start_date_period=api_parliament_period["start_date_period"],
+                end_date_period=api_parliament_period["end_date_period"],
+                parliament_id=api_parliament_period["parliament"]["id"]
+                if api_parliament_period["parliament"]
+                else None,
+            )
+            for api_parliament_period in api_parliament_periods
+        ]
+    )
+    session.commit()
+    session.close()
 
 
 def insert_parliament_period(data: list):
