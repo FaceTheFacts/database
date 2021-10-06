@@ -67,7 +67,7 @@ def populate_cities() -> None:
     session = Session()
     session.bulk_save_objects(
         [
-            Country(
+            City(
                 id=api_city["id"],
                 entity_type=api_city["entity_type"],
                 label=api_city["label"],
