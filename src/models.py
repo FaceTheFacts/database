@@ -419,28 +419,32 @@ class ElectionProgram(Base):
     Party = relationship("Party")
 
 
-def insert_election_program(data):
-    data_list = []
-    for datum in data:
-        link = datum["link"][0]
-        new_datum = ElectionProgram(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            parliament_period_id=datum["parliament_period"]["id"]
-            if datum["parliament_period"]
+def populate_election_programs():
+    api_election_programs = fetch_entity("election-program")
+    election_programs = []
+    session = Session()
+    for api_election_program in api_election_programs:
+        link = api_election_program["link"][0]
+        election_program = ElectionProgram(
+            id=api_election_program["id"],
+            entity_type=api_election_program["entity_type"],
+            label=api_election_program["label"],
+            api_url=api_election_program["api_url"],
+            parliament_period_id=api_election_program["parliament_period"]["id"]
+            if api_election_program["parliament_period"]
             else None,
-            party_id=datum["party"]["id"] if datum["party"] else None,
+            party_id=api_election_program["party"]["id"]
+            if api_election_program["party"]
+            else None,
             link_uri=link["uri"],
             link_title=link["title"],
             link_option=link["option"] if link.get("option") else None,
-            file=datum["file"],
+            file=api_election_program["file"],
         )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+        election_programs.append(election_program)
+    session.add_all(election_programs)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
+    print(f"Inserted {len(election_programs)} row of Election Programs in total")
     session.close()
 
 
@@ -595,7 +599,7 @@ if __name__ == "__main__":
     # populate_electoral_lists()
     # link_length_checker_election_program()
     # link_checker_election_program()
-    # insert_election_program(election_program_fetch())
+    # populate_election_programs()
     # insert_fraction_membership()
     # insert_electoral_data()
     insert_candidacy_mandate()
