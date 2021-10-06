@@ -269,7 +269,6 @@ def populate_parliaments() -> None:
     session.close()
 
 
-
 class Fraction(Base):
     __tablename__ = "fraction"
     id = Column(Integer(), primary_key=True)
@@ -283,20 +282,25 @@ class Fraction(Base):
     fraction_membership = relationship("Fraction_membership", back_populates="fraction")
 
 
-def insert_fraction(data: list) -> None:
-    data_list = []
-    for datum in data:
-        new_datum = Fraction(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            full_name=datum["full_name"],
-            short_name=datum["short_name"],
-            legislature_id=datum["legislature"]["id"] if datum["legislature"] else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_fractions() -> None:
+    api_fractions = fetch_entity("fractions")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Fraction(
+                id=api_fraction["id"],
+                entity_type=api_fraction["entity_type"],
+                label=api_fraction["label"],
+                api_url=api_fraction["api_url"],
+                full_name=api_fraction["full_name"],
+                short_name=api_fraction["short_name"],
+                legislature_id=api_fraction["legislature"]["id"]
+                if api_fraction["legislature"]
+                else None,
+            )
+            for api_fraction in api_fractions
+        ]
+    )
     session.commit()
     session.close()
 
@@ -594,7 +598,7 @@ if __name__ == "__main__":
     # populate_politicians()
     # populate_parliament_periods()
     # populate_parliaments()
-    # insert_fraction(fraction_fetch())
+    # populate_fractions()
     # isParliament_period()
     # insert_constituency(constituency_fetch())
     # insert_electoral_list(electoral_list_fetch())
