@@ -183,7 +183,7 @@ def populate_politicians() -> None:
     print(f"Total runtime to store {len(api_politicians)} rows for politicians is {time_end - time_begin}")
 
 
-class Parliament_period(Base):
+class ParliamentPeriod(Base):
     __tablename__ = "parliament_period"
     id = Column(Integer(), primary_key=True)
     entity_type = Column(String)
@@ -206,7 +206,7 @@ class Parliament_period(Base):
 def insert_parliament_period(data: list):
     data_list = []
     for datum in data:
-        new_datum = Parliament_period(
+        new_datum = ParliamentPeriod(
             id=datum["id"],
             entity_type=datum["entity_type"],
             label=datum["label"],
@@ -240,7 +240,7 @@ def update_previous_period_id(data: list):
         if data_dict["previous_period_id"] != None:
             engine.execute(
                 "UPDATE {table} SET previous_period_id = {previous_period_id} WHERE id = {id}".format(
-                    table=Parliament_period.__tablename__,
+                    table=ParliamentPeriod.__tablename__,
                     previous_period_id=data_dict["previous_period_id"],
                     id=data_dict["id"],
                 )
@@ -258,7 +258,7 @@ class Parliament(Base):
     abgeordnetenwatch_url = Column(String)
     label_external_long = Column(String)
     # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
-    # parliament_period = relationship("Parliament_period")
+    # parliament_period = relationship("ParliamentPeriod")
 
 
 def insert_parliament(data: list):
@@ -311,7 +311,7 @@ class Fraction(Base):
     full_name = Column(String)
     short_name = Column(String)
     legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
-    parliament_period = relationship("Parliament_period")
+    parliament_period = relationship("ParliamentPeriod")
     fraction_membership = relationship("Fraction_membership", back_populates="fraction")
 
 
@@ -342,7 +342,7 @@ class Constituency(Base):
     name = Column(String)
     number = Column(Integer)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
-    parliament_period = relationship("Parliament_period")
+    parliament_period = relationship("ParliamentPeriod")
     electoral_data = relationship("Electoral_data", back_populates="constituency")
 
 
@@ -386,7 +386,7 @@ class Electoral_list(Base):
     api_url = Column(String)
     name = Column(String)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
-    parliament_period = relationship("Parliament_period")
+    parliament_period = relationship("ParliamentPeriod")
     electoral_data = relationship("Electoral_data", back_populates="electoral_list")
 
 
@@ -451,7 +451,7 @@ class Election_program(Base):
     link_title = Column(String)
     link_option = Column(String)
     file = Column(String)
-    parliament_period = relationship("Parliament_period")
+    parliament_period = relationship("ParliamentPeriod")
     Party = relationship("Party")
 
 
@@ -574,7 +574,7 @@ class Candidacy_mandate(Base):
     fraction_membership_id = Column(Integer, ForeignKey("fraction_membership.id"))
     # Many to One
     parliament_period = relationship(
-        "Parliament_period", back_populates="candidacy_mandates"
+        "ParliamentPeriod", back_populates="candidacy_mandates"
     )
     politician = relationship("Politician", back_populates="candidacy_mandates")
     party = relationship("Party", back_populates="candidacy_mandates")
