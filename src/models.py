@@ -34,7 +34,6 @@ class Country(Base):
     api_url = Column(String, unique=True)
 
 
-
 def populate_countries() -> None:
     api_countries = fetch_entity("countries")
     session = Session()
@@ -51,7 +50,6 @@ def populate_countries() -> None:
     )
     session.commit()
     session.close()
-
 
 
 class City(Base):
@@ -88,24 +86,27 @@ class Party(Base):
     api_url = Column(String, unique=True)
     full_name = Column(String)
     short_name = Column(String)
+
     # One to Many
     candidacy_mandates = relationship("Candidacy_mandate", back_populates="party")
 
 
-def insert_party(data: list):
-    # party No.26 is missing
-    data_list = []
-    for datum in data:
-        new_datum = Party(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            full_name=datum["full_name"],
-            short_name=datum["short_name"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_parties() -> None:
+    api_parties = fetch_entity("parties")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Party(
+                id=api_party["id"],
+                entity_type=api_party["entity_type"],
+                label=api_party["label"],
+                api_url=api_party["api_url"],
+                full_name=api_party["full_name"],
+                short_name=api_party["short_name"],
+            )
+            for api_party in api_parties
+        ]
+    )
     session.commit()
     session.close()
 
@@ -612,7 +613,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     # populate_countries()
     # populate_cities()
-    # insert_party(party_fetch())
+    # populate_parties()
     # insert_politician(politician_fetch())
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
