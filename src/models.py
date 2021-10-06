@@ -340,7 +340,7 @@ def populate_constituencies():
     session.close()
 
 
-class Electoral_list(Base):
+class ElectoralList(Base):
     __tablename__ = "electoral_list"
     id = Column(Integer(), primary_key=True)
     entity_type = Column(String)
@@ -355,7 +355,7 @@ class Electoral_list(Base):
 def insert_electoral_list(data):
     data_list = []
     for datum in data:
-        new_datum = Electoral_list(
+        new_datum = ElectoralList(
             id=datum["id"],
             entity_type=datum["entity_type"],
             label=datum["label"],
@@ -487,7 +487,7 @@ class Electoral_data(Base):
     constituency_result = Column(Float)
     constituency_result_count = Column(Integer)
     mandate_won = Column(String)
-    electoral_list = relationship("Electoral_list", back_populates="electoral_data")
+    electoral_list = relationship("ElectoralList", back_populates="electoral_data")
     constituency = relationship("Constituency", back_populates="electoral_data")
     # One to One
     candidacy_mandate = relationship(
