@@ -74,3 +74,7 @@ def electoral_list_fetch():
 
 def election_program_fetch():
     return fetch("election-program")
+
+
+def candidacy_mandate_fetch():
+    return fetch("candidacies-mandates")

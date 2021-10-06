@@ -1,6 +1,6 @@
 import time
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Date, Boolean, ForeignKey, Float
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
 from fetch import (
@@ -15,6 +15,11 @@ from fetch import (
     party_fetch,
     politician_fetch,
 )
+
+import sys
+
+sys.path.append("src")
+from data.json_handler import json_fetch
 
 Base = declarative_base()
 session = Session()
@@ -74,6 +79,8 @@ class Party(Base):
     api_url = Column(String, unique=True)
     full_name = Column(String)
     short_name = Column(String)
+    # One to Many
+    candidacy_mandates = relationship("Candidacy_mandate", back_populates="party")
 
 
 def insert_party(data: list):
@@ -118,6 +125,8 @@ class Politician(Base):
     qid_wikidata = Column(String)
     field_title = Column(String)
     party = relationship("Party")
+    # One to Many
+    candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
 
 
 def insert_politician(data: list):
@@ -169,6 +178,10 @@ class Parliament_period(Base):
     parliament_id = Column(Integer, ForeignKey("parliament.id"))
     previous_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament = relationship("Parliament")
+    # One to Many
+    candidacy_mandates = relationship(
+        "Candidacy_mandate", back_populates="parliament_period"
+    )
 
 
 def insert_parliament_period(data: list):
@@ -280,7 +293,7 @@ class Fraction(Base):
     short_name = Column(String)
     legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
-    fraction_membership = relationship("Fraction_member", back_populates="fraction")
+    fraction_membership = relationship("Fraction_membership", back_populates="fraction")
 
 
 def insert_fraction(data: list) -> None:
@@ -311,6 +324,7 @@ class Constituency(Base):
     number = Column(Integer)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
+    electoral_data = relationship("Electoral_data", back_populates="constituency")
 
 
 def isParliament_period():
@@ -354,6 +368,7 @@ class Electoral_list(Base):
     name = Column(String)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("Parliament_period")
+    electoral_data = relationship("Electoral_data", back_populates="electoral_list")
 
 
 def insert_electoral_list(data):
@@ -449,10 +464,138 @@ def insert_election_program(data):
 class Fraction_membership(Base):
     __tablename__ = "fraction_membership"
     id = Column(Integer, primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
     fraction_id = Column(Integer, ForeignKey("fraction.id"))
     valid_from = Column(String)
     valid_until = Column(String)
     fraction = relationship("Fraction", back_populates="fraction_membership")
+    # One to One
+    candidacy_mandate = relationship(
+        "Candidacy_mandate", back_populates="fraction_membership"
+    )
+
+
+def insert_fraction_membership():
+    data_list = []
+    data = json_fetch("fraction_membership_fraction")
+    for datum in data:
+        new_datum = Fraction_membership(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            fraction_id=datum["fraction_id"],
+            valid_from=datum["valid_from"],
+            valid_until=datum["valid_until"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
+
+
+class Electoral_data(Base):
+    __tablename__ = "electoral_data"
+    id = Column(Integer, primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    electoral_list_id = Column(Integer, ForeignKey("electoral_list.id"))
+    list_position = Column(Integer)
+    constituency_id = Column(Integer, ForeignKey("constituency.id"))
+    constituency_result = Column(Float)
+    constituency_result_count = Column(Integer)
+    mandate_won = Column(String)
+    electoral_list = relationship("Electoral_list", back_populates="electoral_data")
+    constituency = relationship("Constituency", back_populates="electoral_data")
+    # One to One
+    candidacy_mandate = relationship(
+        "Candidacy_mandate", back_populates="electoral_data"
+    )
+
+
+def insert_electoral_data():
+    data_list = []
+    data = json_fetch("electoral_data_ids")
+    for datum in data:
+        new_datum = Electoral_data(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            electoral_list_id=datum["electoral_list_id"],
+            list_position=datum["list_position"],
+            constituency_id=datum["constituency_id"],
+            constituency_result=datum["constituency_result"],
+            constituency_result_count=datum["constituency_result_count"],
+            mandate_won=datum["mandate_won"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
+
+
+class Candidacy_mandate(Base):
+    __tablename__ = "candidacy_mandate"
+    id = Column(Integer, primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    id_external_administration = Column(String)
+    id_external_administration_description = Column(String)
+    type = Column(String)
+    parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    politician_id = Column(Integer, ForeignKey("politician.id"))
+    party_id = Column(Integer, ForeignKey("party.id"))
+    start_date = Column(Date)
+    end_date = Column(Date)
+    info = Column(String)
+    electoral_data_id = Column(Integer, ForeignKey("electoral_data.id"))
+    fraction_membership_id = Column(Integer, ForeignKey("fraction_membership.id"))
+    # Many to One
+    parliament_period = relationship(
+        "Parliament_period", back_populates="candidacy_mandates"
+    )
+    politician = relationship("Politician", back_populates="candidacy_mandates")
+    party = relationship("Party", back_populates="candidacy_mandates")
+    # One to One
+    electoral_data = relationship(
+        "Electoral_data", back_populates="candidacy_mandate", uselist=False
+    )
+    fraction_membership = relationship(
+        "Fraction_membership", back_populates="candidacy_mandate", uselist=False
+    )
+
+
+def insert_candidacy_mandate():
+    data_list = []
+    data = json_fetch("candidacy_mandate_ids")
+    for datum in data:
+        new_datum = Candidacy_mandate(
+            id=datum["id"],
+            entity_type=datum["entity_type"],
+            label=datum["label"],
+            api_url=datum["api_url"],
+            id_external_administration=datum["id_external_administration"],
+            id_external_administration_description=datum[
+                "id_external_administration_description"
+            ],
+            type=datum["type"],
+            parliament_period_id=datum["parliament_period_id"],
+            politician_id=datum["politician_id"],
+            party_id=datum["party_id"],
+            start_date=datum["start_date"],
+            end_date=datum["end_date"],
+            info=datum["info"],
+            electoral_data_id=datum["electoral_data_id"],
+            fraction_membership_id=datum["fraction_membership_id"],
+        )
+        data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    print("Inserted {} data in total".format(len(data_list)))
+    session.close()
 
 
 if __name__ == "__main__":
@@ -473,3 +616,6 @@ if __name__ == "__main__":
     # link_length_checker_election_program()
     # link_checker_election_program()
     # insert_election_program(election_program_fetch())
+    # insert_fraction_membership()
+    # insert_electoral_data()
+    insert_candidacy_mandate()
