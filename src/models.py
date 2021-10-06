@@ -62,17 +62,20 @@ class City(Base):
     api_url = Column(String, unique=True)
 
 
-def insert_city(data: list):
-    data_list = []
-    for datum in data:
-        new_datum = City(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_cities() -> None:
+    api_cities = fetch_entity("cities")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Country(
+                id=api_city["id"],
+                entity_type=api_city["entity_type"],
+                label=api_city["label"],
+                api_url=api_city["api_url"],
+            )
+            for api_city in api_cities
+        ]
+    )
     session.commit()
     session.close()
 
@@ -608,7 +611,7 @@ if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
     # populate_countries()
-    # insert_city(city_fetch())
+    # populate_cities()
     # insert_party(party_fetch())
     # insert_politician(politician_fetch())
     # insert_parliament_period(parliament_period_fetch())
