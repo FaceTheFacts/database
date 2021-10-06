@@ -199,6 +199,7 @@ class ParliamentPeriod(Base):
     parliament_id = Column(Integer, ForeignKey("parliament.id"))
     previous_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament = relationship("Parliament")
+
     # One to Many
     candidacy_mandates = relationship(
         "Candidacy_mandate", back_populates="parliament_period"
@@ -220,6 +221,9 @@ def populate_parliament_periods() -> None:
                 election_date=api_parliament_period["election_date"],
                 start_date_period=api_parliament_period["start_date_period"],
                 end_date_period=api_parliament_period["end_date_period"],
+                previous_period_id=api_parliament_period["previous_period"]["id"]
+                if api_parliament_period["previous_period"]
+                else None,
                 parliament_id=api_parliament_period["parliament"]["id"]
                 if api_parliament_period["parliament"]
                 else None,
@@ -230,51 +234,6 @@ def populate_parliament_periods() -> None:
     session.commit()
     session.close()
 
-
-def insert_parliament_period(data: list):
-    data_list = []
-    for datum in data:
-        new_datum = ParliamentPeriod(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-            type=datum["type"],
-            election_date=datum["election_date"],
-            start_date_period=datum["start_date_period"],
-            end_date_period=datum["end_date_period"],
-            parliament_id=datum["parliament"]["id"] if datum["parliament"] else None,
-            # previous_period_id=datum["previous_period"]["id"] if datum["previous_period"] else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
-    session.commit()
-    session.close()
-
-
-def update_previous_period_id(data: list):
-    data_list = []
-    for datum in data:
-        new_data = {
-            "id": datum["id"],
-            "previous_period_id": datum["previous_period"]["id"]
-            if datum["previous_period"]
-            else None,
-        }
-        data_list.append(new_data)
-
-    for data_dict in data_list:
-        if data_dict["previous_period_id"] != None:
-            engine.execute(
-                "UPDATE {table} SET previous_period_id = {previous_period_id} WHERE id = {id}".format(
-                    table=ParliamentPeriod.__tablename__,
-                    previous_period_id=data_dict["previous_period_id"],
-                    id=data_dict["id"],
-                )
-            )
-    session.commit()
-    session.close()
 
 
 class Parliament(Base):
@@ -652,9 +611,8 @@ if __name__ == "__main__":
     # populate_cities()
     # populate_parties()
     # populate_politicians()
-    # insert_parliament_period(parliament_period_fetch())
+    # populate_parliament_periods()
     # insert_parliament(parliament_fetch())
-    # update_previous_period_id(parliament_period_fetch())
     # update_current_project_id(parliament_fetch())
     # insert_fraction(fraction_fetch())
     # isParliament_period()
