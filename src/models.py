@@ -15,6 +15,7 @@ from fetch import (
     party_fetch,
     politician_fetch,
 )
+from fetch import fetch_entity
 
 import sys
 
@@ -33,19 +34,24 @@ class Country(Base):
     api_url = Column(String, unique=True)
 
 
-def insert_country(data: list):
-    data_list = []
-    for datum in data:
-        new_country = Country(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-        )
-        data_list.append(new_country)
-    session.add_all(data_list)
+
+def populate_countries() -> None:
+    api_countries = fetch_entity("countries")
+    session = Session()
+    session.bulk_save_objects(
+        [
+            Country(
+                id=api_country["id"],
+                entity_type=api_country["entity_type"],
+                label=api_country["label"],
+                api_url=api_country["api_url"],
+            )
+            for api_country in api_countries
+        ]
+    )
     session.commit()
     session.close()
+
 
 
 class City(Base):
@@ -601,7 +607,7 @@ def insert_candidacy_mandate():
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    # insert_country(country_fetch())
+    # populate_countries()
     # insert_city(city_fetch())
     # insert_party(party_fetch())
     # insert_politician(politician_fetch())
