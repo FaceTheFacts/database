@@ -51,8 +51,10 @@ def topic_fetch():
 def politician_fetch():
     return fetch("politicians")
 
+
 def committee_fetch():
     return fetch("committees")
+
 
 def parliament_fetch():
     return fetch("parliaments")
@@ -76,3 +78,11 @@ def electoral_list_fetch():
 
 def election_program_fetch():
     return fetch("election-program")
+
+
+def candidacy_mandate_fetch():
+    return fetch("candidacies-mandates")
+
+
+def committee_memberships_fetch():
+    return fetch("committee-memberships")
