@@ -1,0 +1,506 @@
+[
+    {
+        "id": 13318,
+        "entity_type": "committee_membership",
+        "label": "Eva Feußner - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/13318",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41302,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4136,
+        "entity_type": "committee_membership",
+        "label": "Thomas vom Bruch - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4136",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44732,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4135,
+        "entity_type": "committee_membership",
+        "label": "Sükrü Senkal - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4135",
+        "committee_id": 355,
+        "candidacy_mandate_id": 38618,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4134,
+        "entity_type": "committee_membership",
+        "label": "Klaus-Rainer Rupp - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4134",
+        "committee_id": 355,
+        "candidacy_mandate_id": 45206,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4133,
+        "entity_type": "committee_membership",
+        "label": "Insa Peters-Rehwinkel - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4133",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44119,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4132,
+        "entity_type": "committee_membership",
+        "label": "Mustafa Kemal Öztürk - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4132",
+        "committee_id": 355,
+        "candidacy_mandate_id": 41324,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4131,
+        "entity_type": "committee_membership",
+        "label": "Sülmez Dogan - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4131",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44752,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4130,
+        "entity_type": "committee_membership",
+        "label": "Magnus Buhlert - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4130",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44759,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4129,
+        "entity_type": "committee_membership",
+        "label": "Sybille Böschen - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4129",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44111,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4128,
+        "entity_type": "committee_membership",
+        "label": "Sandra Ahrens - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4128",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44730,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4127,
+        "entity_type": "committee_membership",
+        "label": "Kristina Vogt - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4127",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44753,
+        "committee_role": "member"
+    },
+    {
+        "id": 4126,
+        "entity_type": "committee_membership",
+        "label": "Turhal Özdal - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4126",
+        "committee_id": 355,
+        "candidacy_mandate_id": 38612,
+        "committee_role": "member"
+    },
+    {
+        "id": 4125,
+        "entity_type": "committee_membership",
+        "label": "Silvia Neumeyer - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4125",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44731,
+        "committee_role": "member"
+    },
+    {
+        "id": 4124,
+        "entity_type": "committee_membership",
+        "label": "Sascha Karolin Aulepp - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4124",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44741,
+        "committee_role": "member"
+    },
+    {
+        "id": 4123,
+        "entity_type": "committee_membership",
+        "label": "Hauke Hilz - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4123",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44760,
+        "committee_role": "member"
+    },
+    {
+        "id": 4122,
+        "entity_type": "committee_membership",
+        "label": "Antje Grotheer - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4122",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44742,
+        "committee_role": "member"
+    },
+    {
+        "id": 4121,
+        "entity_type": "committee_membership",
+        "label": "Björn Tschöpe - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4121",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44743,
+        "committee_role": "vice_chairperson"
+    },
+    {
+        "id": 4120,
+        "entity_type": "committee_membership",
+        "label": "Maike Schaefer - 2. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 95 Immunität)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4120",
+        "committee_id": 355,
+        "candidacy_mandate_id": 44807,
+        "committee_role": "chairperson"
+    },
+    {
+        "id": 4119,
+        "entity_type": "committee_membership",
+        "label": "Helmut Weigelt - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4119",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44128,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4118,
+        "entity_type": "committee_membership",
+        "label": "Klaus-Rainer Rupp - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4118",
+        "committee_id": 354,
+        "candidacy_mandate_id": 45206,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4117,
+        "entity_type": "committee_membership",
+        "label": "Insa Peters-Rehwinkel - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4117",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44119,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4116,
+        "entity_type": "committee_membership",
+        "label": "Marco Lübke - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4116",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44727,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4115,
+        "entity_type": "committee_membership",
+        "label": "Kirsten Kappert-Gonther - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4115",
+        "committee_id": 354,
+        "candidacy_mandate_id": 38607,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4114,
+        "entity_type": "committee_membership",
+        "label": "Wilhelm Hinners - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4114",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44117,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4113,
+        "entity_type": "committee_membership",
+        "label": "Björn Fecker - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4113",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44747,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4112,
+        "entity_type": "committee_membership",
+        "label": "Rainer Buchholz - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4112",
+        "committee_id": 354,
+        "candidacy_mandate_id": 38614,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4111,
+        "entity_type": "committee_membership",
+        "label": "Mehmet-Ali Seyrek - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4111",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44739,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 4110,
+        "entity_type": "committee_membership",
+        "label": "Kristina Vogt - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4110",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44753,
+        "committee_role": "member"
+    },
+    {
+        "id": 4109,
+        "entity_type": "committee_membership",
+        "label": "Björn Tschöpe - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4109",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44743,
+        "committee_role": "member"
+    },
+    {
+        "id": 4108,
+        "entity_type": "committee_membership",
+        "label": "Claas Rohmeyer - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4108",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44735,
+        "committee_role": "member"
+    },
+    {
+        "id": 4107,
+        "entity_type": "committee_membership",
+        "label": "Sascha Karolin Aulepp - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4107",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44741,
+        "committee_role": "member"
+    },
+    {
+        "id": 4106,
+        "entity_type": "committee_membership",
+        "label": "Antje Grotheer - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4106",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44742,
+        "committee_role": "member"
+    },
+    {
+        "id": 4105,
+        "entity_type": "committee_membership",
+        "label": "Sülmez Dogan - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4105",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44752,
+        "committee_role": "member"
+    },
+    {
+        "id": 4104,
+        "entity_type": "committee_membership",
+        "label": "Magnus Buhlert - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4104",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44759,
+        "committee_role": "member"
+    },
+    {
+        "id": 4103,
+        "entity_type": "committee_membership",
+        "label": "Wilko Zicht - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4103",
+        "committee_id": 354,
+        "candidacy_mandate_id": 38610,
+        "committee_role": "vice_chairperson"
+    },
+    {
+        "id": 4102,
+        "entity_type": "committee_membership",
+        "label": "Oguzhan Yazici - 1. Nichtständiger Ausschuss nach Art. 125 der Landesverfassung (Art. 61 Körperschaften)",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/4102",
+        "committee_id": 354,
+        "candidacy_mandate_id": 44725,
+        "committee_role": "chairperson"
+    },
+    {
+        "id": 1941,
+        "entity_type": "committee_membership",
+        "label": "Dagmar Zoschke - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1941",
+        "committee_id": 236,
+        "candidacy_mandate_id": 43665,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1940,
+        "entity_type": "committee_membership",
+        "label": "Ulrich Siegmund - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1940",
+        "committee_id": 236,
+        "candidacy_mandate_id": 43988,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1939,
+        "entity_type": "committee_membership",
+        "label": "Dorothea Frederking - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1939",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41103,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1938,
+        "entity_type": "committee_membership",
+        "label": "Angela Gorr - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1938",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41296,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1937,
+        "entity_type": "committee_membership",
+        "label": "Thomas Lippmann - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1937",
+        "committee_id": 236,
+        "candidacy_mandate_id": 46083,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1936,
+        "entity_type": "committee_membership",
+        "label": "Volker Olenicak - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1936",
+        "committee_id": 236,
+        "candidacy_mandate_id": 44003,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1935,
+        "entity_type": "committee_membership",
+        "label": "Jürgen Barth - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1935",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41308,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1934,
+        "entity_type": "committee_membership",
+        "label": "Andreas Schmidt - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1934",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41190,
+        "committee_role": "alternate_member"
+    },
+    {
+        "id": 1933,
+        "entity_type": "committee_membership",
+        "label": "Dietmar Krause - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1933",
+        "committee_id": 236,
+        "candidacy_mandate_id": 43666,
+        "committee_role": "member"
+    },
+    {
+        "id": 1932,
+        "entity_type": "committee_membership",
+        "label": "Eva von Angern - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1932",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41303,
+        "committee_role": "member"
+    },
+    {
+        "id": 1931,
+        "entity_type": "committee_membership",
+        "label": "Katja Pähle - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1931",
+        "committee_id": 236,
+        "candidacy_mandate_id": 46082,
+        "committee_role": "member"
+    },
+    {
+        "id": 1930,
+        "entity_type": "committee_membership",
+        "label": "Silke Schindler - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1930",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41317,
+        "committee_role": "member"
+    },
+    {
+        "id": 1929,
+        "entity_type": "committee_membership",
+        "label": "Daniel Roi - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1929",
+        "committee_id": 236,
+        "candidacy_mandate_id": 41189,
+        "committee_role": "member"
+    },
+    {
+        "id": 1928,
+        "entity_type": "committee_membership",
+        "label": "Sebastian Striegel - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1928",
+        "committee_id": 236,
+        "candidacy_mandate_id": 40980,
+        "committee_role": "member"
+    },
+    {
+        "id": 1927,
+        "entity_type": "committee_membership",
+        "label": "Oliver Kirchner - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1927",
+        "committee_id": 236,
+        "candidacy_mandate_id": 46085,
+        "committee_role": "member"
+    },
+    {
+        "id": 1926,
+        "entity_type": "committee_membership",
+        "label": "Tobias Krull - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1926",
+        "committee_id": 236,
+        "candidacy_mandate_id": 43991,
+        "committee_role": "member"
+    },
+    {
+        "id": 1924,
+        "entity_type": "committee_membership",
+        "label": "Christina Buchheim - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1924",
+        "committee_id": 236,
+        "candidacy_mandate_id": 44000,
+        "committee_role": "member"
+    },
+    {
+        "id": 1923,
+        "entity_type": "committee_membership",
+        "label": "Daniel Szarata - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1923",
+        "committee_id": 236,
+        "candidacy_mandate_id": 43995,
+        "committee_role": "member"
+    },
+    {
+        "id": 1922,
+        "entity_type": "committee_membership",
+        "label": "Robert Farle - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1922",
+        "committee_id": 236,
+        "candidacy_mandate_id": 44006,
+        "committee_role": "vice_chairperson"
+    },
+    {
+        "id": 1921,
+        "entity_type": "committee_membership",
+        "label": "Andreas Schumann - Enquete-Kommission Stärkung der Demokratie",
+        "api_url": "https://www.abgeordnetenwatch.de/api/v2/committee-memberships/1921",
+        "committee_id": 236,
+        "candidacy_mandate_id": 40520,
+        "committee_role": "chairperson"
+    }
+]
