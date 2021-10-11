@@ -22,7 +22,6 @@ from fetch import (
     fraction_fetch,
     parliament_fetch,
     parliament_period_fetch,
-    politician_fetch,
     topic_fetch,
 )
 import json
@@ -166,39 +165,48 @@ class Politician(Base):
     cvs = relationship("CV", back_populates="politician")
 
 
-def insert_politician(data: list):
-    begin = time.time()
-    data_list = []
-    for datum in data:
-        new_datum = Politician(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-            first_name=datum["first_name"],
-            last_name=datum["last_name"],
-            birth_name=datum["birth_name"],
-            sex=datum["sex"],
-            year_of_birth=datum["year_of_birth"],
-            party_id=datum["party"]["id"] if datum["party"] else None,
-            party_past=datum["party_past"],
-            deceased=datum["deceased"],
-            deceased_date=datum["deceased_date"],
-            education=datum["education"],
-            residence=datum["residence"],
-            occupation=datum["occupation"],
-            statistic_questions=datum["statistic_questions"],
-            statistic_questions_answered=datum["statistic_questions_answered"],
-            qid_wikidata=datum["qid_wikidata"],
-            field_title=datum["field_title"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_politicians() -> None:
+    begin_time = time.time()
+    api_politicians = fetch_entity("parties")
+    session = Session()
+    session.add_all(
+        [
+            Politician(
+                id=api_politician["id"],
+                entity_type=api_politician["entity_type"],
+                label=api_politician["label"],
+                api_url=api_politician["api_url"],
+                abgeordnetenwatch_url=api_politician["abgeordnetenwatch_url"],
+                first_name=api_politician["first_name"],
+                last_name=api_politician["last_name"],
+                birth_name=api_politician["birth_name"],
+                sex=api_politician["sex"],
+                year_of_birth=api_politician["year_of_birth"],
+                party_id=api_politician["party"]["id"]
+                if api_politician["party"]
+                else None,
+                party_past=api_politician["party_past"],
+                deceased=api_politician["deceased"],
+                deceased_date=api_politician["deceased_date"],
+                education=api_politician["education"],
+                residence=api_politician["residence"],
+                occupation=api_politician["occupation"],
+                statistic_questions=api_politician["statistic_questions"],
+                statistic_questions_answered=api_politician[
+                    "statistic_questions_answered"
+                ],
+                qid_wikidata=api_politician["qid_wikidata"],
+                field_title=api_politician["field_title"],
+            )
+            for api_politician in api_politicians
+        ]
+    )
     session.commit()
     session.close()
-    end = time.time()
-    print(f"Total runtime to store {len(data_list)} data is {end - begin}")
+    end_time = time.time()
+    print(
+        f"Total runtime to store {len(api_politicians)} data is {end_time - begin_time}"
+    )
 
 
 class Parliament_period(Base):
@@ -1335,7 +1343,7 @@ if __name__ == "__main__":
     # populate_countries()
     # populate_cities()
     # populate_parties()
-    # insert_politician(politician_fetch())
+    # populate_politicians()
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
     # update_previous_period_id(parliament_period_fetch())
