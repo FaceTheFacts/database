@@ -21,8 +21,6 @@ from fetch import (
     election_program_fetch,
     electoral_list_fetch,
     fraction_fetch,
-    parliament_fetch,
-    parliament_period_fetch,
     topic_fetch,
 )
 import json
@@ -220,6 +218,85 @@ def populate_politicians() -> None:
     )
 
 
+class Parliament(Base):
+    __tablename__ = "parliament"
+    id = Column(Integer(), primary_key=True)
+    entity_type = Column(String)
+    label = Column(String)
+    api_url = Column(String)
+    abgeordnetenwatch_url = Column(String)
+    label_external_long = Column(String)
+    current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
+
+    # parliament_period = relationship("ParliamentPeriod")
+
+
+def populate_parliaments() -> None:
+    api_parliaments = load_entity("parliaments")
+    parliaments = [
+        {
+            "id": api_parliament["id"],
+            "entity_type": api_parliament["entity_type"],
+            "label": api_parliament["label"],
+            "api_url": api_parliament["api_url"],
+            "abgeordnetenwatch_url": api_parliament["abgeordnetenwatch_url"],
+            "label_external_long": api_parliament["label_external_long"],
+        }
+        for api_parliament in api_parliaments
+    ]
+    session = Session()
+    stmt = insert(Parliament).values(parliaments)
+    stmt = stmt.on_conflict_do_update(
+        constraint="parliament_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
+    session.commit()
+    session.close()
+
+
+# def update_parliament_project():
+#     session = Session()
+#     api_parliaments = load_entity("parliaments")
+
+#     foo = []
+#     for ap in api_parliaments:
+#         p = {
+#             "id": ap["id"],
+#             "current_project_id": ap["current_project"]["id"]
+#             if ap["current_project"]
+#             else None,
+#         }
+#         foo.append(p)
+
+#     # print(foo)
+#     session.bulk_update_mappings(Parliament, foo)
+#     session.commit()
+
+
+def update_parliament_current_project_ids():
+    api_parliaments = load_entity("parliaments")
+    parliaments = [
+        {
+            "id": parliament["id"],
+            "current_project_id": parliament["current_project"]["id"]
+            if parliament["current_project"]
+            else None,
+        }
+        for parliament in api_parliaments
+    ]
+
+    for parliament in parliaments:
+        if parliament["current_project_id"]:
+            engine.execute(
+                "UPDATE {table} SET current_project_id = {current_project_id} WHERE id = {id}".format(
+                    table=Parliament.__tablename__,
+                    current_project_id=parliament["current_project_id"],
+                    id=parliament["id"],
+                )
+            )
+
+
 class ParliamentPeriod(Base):
     __tablename__ = "parliament_period"
     id = Column(Integer(), primary_key=True)
@@ -243,102 +320,39 @@ class ParliamentPeriod(Base):
     positions = relationship("Position", back_populates="parliament_periods")
 
 
-def insert_parliament_period(data: list):
-    data_list = []
-    for datum in data:
-        new_datum = ParliamentPeriod(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-            type=datum["type"],
-            election_date=datum["election_date"],
-            start_date_period=datum["start_date_period"],
-            end_date_period=datum["end_date_period"],
-            parliament_id=datum["parliament"]["id"] if datum["parliament"] else None,
-            # previous_period_id=datum["previous_period"]["id"] if datum["previous_period"] else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
-    session.commit()
-    session.close()
-
-
-def update_previous_period_id(data: list):
-    data_list = []
-    for datum in data:
-        new_data = {
-            "id": datum["id"],
-            "previous_period_id": datum["previous_period"]["id"]
-            if datum["previous_period"]
+def populate_parliament_periods():
+    api_parliament_periods = load_entity("parliament-periods")
+    parliament_periods = [
+        {
+            "id": api_parliament_period["id"],
+            "entity_type": api_parliament_period["entity_type"],
+            "label": api_parliament_period["label"],
+            "api_url": api_parliament_period["api_url"],
+            "abgeordnetenwatch_url": api_parliament_period["abgeordnetenwatch_url"],
+            "type": api_parliament_period["type"],
+            "election_date": api_parliament_period["election_date"],
+            "start_date_period": api_parliament_period["start_date_period"],
+            "end_date_period": api_parliament_period["end_date_period"],
+            "parliament_id": api_parliament_period["parliament"]["id"]
+            if api_parliament_period["parliament"]
+            else None,
+            "previous_period_id": api_parliament_period["previous_period"]["id"]
+            if api_parliament_period["previous_period"]
             else None,
         }
-        data_list.append(new_data)
-
-    for data_dict in data_list:
-        if data_dict["previous_period_id"] != None:
-            engine.execute(
-                "UPDATE {table} SET previous_period_id = {previous_period_id} WHERE id = {id}".format(
-                    table=ParliamentPeriod.__tablename__,
-                    previous_period_id=data_dict["previous_period_id"],
-                    id=data_dict["id"],
-                )
-            )
+        for api_parliament_period in api_parliament_periods
+    ]
+    parliament_periods = sorted(parliament_periods, key=lambda p: p["id"])
+    stmt = insert(ParliamentPeriod).values(parliament_periods)
+    stmt = stmt.on_conflict_do_update(
+        constraint="parliament_period_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session = Session()
+    session.execute(stmt)
     session.commit()
-    session.close()
 
-
-class Parliament(Base):
-    __tablename__ = "parliament"
-    id = Column(Integer(), primary_key=True)
-    entity_type = Column(String)
-    label = Column(String)
-    api_url = Column(String)
-    abgeordnetenwatch_url = Column(String)
-    label_external_long = Column(String)
-    # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
-    # parliament_period = relationship("ParliamentPeriod")
-
-
-def insert_parliament(data: list):
-    data_list = []
-    for datum in data:
-        new_datum = Parliament(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-            label_external_long=datum["label_external_long"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
-    session.commit()
-    session.close()
-
-
-def update_current_project_id(data: list):
-    data_list = []
-    for datum in data:
-        new_data = {
-            "id": datum["id"],
-            "current_project_id": datum["current_project"]["id"]
-            if datum["current_project"]
-            else None,
-        }
-        data_list.append(new_data)
-
-    for data_dict in data_list:
-        if data_dict["current_project_id"] != None:
-            engine.execute(
-                "UPDATE {table} SET current_project_id = {current_project_id} WHERE id = {id}".format(
-                    table=Parliament.__tablename__,
-                    current_project_id=data_dict["current_project_id"],
-                    id=data_dict["id"],
-                )
-            )
-    session.commit()
+    update_parliament_current_project_ids()
     session.close()
 
 
@@ -1288,9 +1302,7 @@ if __name__ == "__main__":
     # Committee_has_topic.insert_committee_has_topic(committee_fetch())
     # populate_countries()
     # populate_cities()
-    populate_parties()
+    # populate_parties()
     # populate_politicians()
-    # insert_parliament_period(parliament_period_fetch())
-    # insert_parliament(parliament_fetch())
-    # update_previous_period_id(parliament_period_fetch())
-    # update_current_project_id(parliament_fetch())
+    populate_parliaments()
+    populate_parliament_periods()
