@@ -26,7 +26,6 @@ from fetch import (
     topic_fetch,
 )
 import json
-from fetch import fetch_entity
 from fetch import load_entity
 
 import sys
@@ -92,19 +91,23 @@ class City(Base):
 
 
 def populate_cities() -> None:
-    api_cities = fetch_entity("cities")
+    api_cities = load_entity("cities")
+    cities = [
+        {
+            "id": api_city["id"],
+            "entity_type": api_city["entity_type"],
+            "label": api_city["label"],
+            "api_url": api_city["api_url"],
+        }
+        for api_city in api_cities
+    ]
     session = Session()
-    session.add_all(
-        [
-            City(
-                id=api_city["id"],
-                entity_type=api_city["entity_type"],
-                label=api_city["label"],
-                api_url=api_city["api_url"],
-            )
-            for api_city in api_cities
-        ]
+    stmt = insert(City).values(cities)
+    stmt = stmt.on_conflict_do_update(
+        constraint="city_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
     )
+    session.execute(stmt)
     session.commit()
     session.close()
 
@@ -122,21 +125,25 @@ class Party(Base):
 
 
 def populate_parties() -> None:
-    api_parties = fetch_entity("parties")
+    api_parties = load_entity("parties")
+    parties = [
+        {
+            "id": api_party["id"],
+            "entity_type": api_party["entity_type"],
+            "label": api_party["label"],
+            "api_url": api_party["api_url"],
+            "full_name": api_party["full_name"],
+            "short_name": api_party["short_name"],
+        }
+        for api_party in api_parties
+    ]
     session = Session()
-    session.add_all(
-        [
-            Party(
-                id=api_party["id"],
-                entity_type=api_party["entity_type"],
-                label=api_party["label"],
-                api_url=api_party["api_url"],
-                full_name=api_party["full_name"],
-                short_name=api_party["short_name"],
-            )
-            for api_party in api_parties
-        ]
+    stmt = insert(Party).values(parties)
+    stmt = stmt.on_conflict_do_update(
+        constraint="party_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
     )
+    session.execute(stmt)
     session.commit()
     session.close()
 
@@ -1352,7 +1359,7 @@ if __name__ == "__main__":
     # Committee_has_topic.insert_committee_has_topic(committee_fetch())
     # populate_countries()
     # populate_cities()
-    # populate_parties()
+    populate_parties()
     # populate_politicians()
     # insert_parliament_period(parliament_period_fetch())
     # insert_parliament(parliament_fetch())
