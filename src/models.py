@@ -232,7 +232,7 @@ class Parliament(Base):
     api_url = Column(String)
     abgeordnetenwatch_url = Column(String)
     label_external_long = Column(String)
-    current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
+    # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
 
     # parliament_period = relationship("ParliamentPeriod")
 
@@ -389,39 +389,31 @@ class Topic(Base):
     )
     position_statements = relationship("Position_statement", back_populates="topics")
 
-    def insert_topic(data: list):
-        data_list = []
-        for datum in data:
-            new_data = Topic(
-                id=datum["id"],
-                entity_type=datum["entity_type"],
-                label=datum["label"],
-                api_url=datum["api_url"],
-                abgeordnetenwatch_url=datum["abgeordnetenwatch_url"],
-                description=datum["description"],
-            )
-            data_list.append(new_data)
-        session.add_all(data_list)
-        session.commit()
-        session.close()
 
-    def update_parent_id(data: list):
-        data_list = []
-        for datum in data:
-            new_data = {
-                "id": datum["id"],
-                "parent_id": datum["parent"][0]["id"] if datum["parent"] else None,
-            }
-            data_list.append(new_data)
-        for data_list_item in data_list:
-            if data_list_item["parent_id"] != None:
-                engine.execute(
-                    "UPDATE {table} SET parent_id = {parent_id} WHERE id = {id}".format(
-                        table=Topic.__tablename__,
-                        parent_id=data_list_item["parent_id"],
-                        id=data_list_item["id"],
-                    )
-                )
+def populate_topics():
+    api_topics = load_entity("topics")
+    topics = [
+        {
+            "id": api_topic["id"],
+            "entity_type": api_topic["entity_type"],
+            "label": api_topic["label"],
+            "api_url": api_topic["api_url"],
+            "abgeordnetenwatch_url": api_topic["abgeordnetenwatch_url"],
+            "description": api_topic["description"],
+            "parent_id": api_topic["parent"][0]["id"] if api_topic["parent"] else None,
+        }
+        for api_topic in api_topics
+    ]
+    topics = sorted(topics, key=lambda t: t["id"])
+    stmt = insert(Topic).values(topics)
+    stmt = stmt.on_conflict_do_update(
+        constraint="topic_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session = Session()
+    session.execute(stmt)
+    session.commit()
+    session.close()
 
 
 class Committee(Base):
@@ -1367,13 +1359,12 @@ if __name__ == "__main__":
     # PositionStatement.insert_position_statement()
     # Position.insert_position()
     # Position_statement.insert_position_statement()
-    # Topic.insert_topic(topic_fetch())
-    # Topic.update_parent_id(topic_fetch())
     # Committee.insert_committee(committee_fetch())
     # Committee_has_topic.insert_committee_has_topic(committee_fetch())
     # populate_countries()
     # populate_cities()
     # populate_parties()
     # populate_politicians()
-    populate_parliaments()
-    populate_parliament_periods()
+    # populate_parliaments()
+    # populate_parliament_periods()
+    populate_topics()
