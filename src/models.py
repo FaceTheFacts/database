@@ -1,5 +1,6 @@
 import time
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import (
     Column,
     String,
@@ -57,19 +58,27 @@ class Country(Base):
 
 def populate_countries() -> None:
     api_countries = fetch_entity("countries")
+    countries = [
+        {
+            "id": api_country["id"],
+            "entity_type": api_country["entity_type"],
+            "label": api_country["label"],
+            "api_url": api_country["api_url"],
+        }
+        for api_country in api_countries
+    ]
+
     session = Session()
-    session.add_all(
-        [
-            Country(
-                id=api_country["id"],
-                entity_type=api_country["entity_type"],
-                label=api_country["label"],
-                api_url=api_country["api_url"],
-            )
-            for api_country in api_countries
-        ]
+    stmt = insert(Country).values(countries)
+    stmt = stmt.on_conflict_do_update(
+        constraint="country_pkey",
+        set_={
+            "entity_type": stmt.excluded.entity_type,
+            "label": stmt.excluded.label,
+            "api_url": stmt.excluded.api_url,
+        },
     )
-    session.commit()
+    session.execute(stmt)
     session.close()
 
 
@@ -167,7 +176,7 @@ class Politician(Base):
 
 def populate_politicians() -> None:
     begin_time = time.time()
-    api_politicians = fetch_entity("parties")
+    api_politicians = fetch_entity("politicians")
     session = Session()
     session.add_all(
         [
