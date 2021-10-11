@@ -151,7 +151,7 @@ class Politician(Base):
     party = relationship("Party")
     # One to Many
     candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
-    positions = relationship("Position", back_populates="politicians")
+    positions = relationship("Position", back_populates="politician")
 
 
 def insert_politician(data: list):
@@ -1206,7 +1206,7 @@ class Position(Base):
     politician_id = Column(Integer, ForeignKey("politician.id"))
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     position_statement_id = Column(Integer, ForeignKey("position_statement.id"))
-    politicians = relationship("Politician", back_populates="positions")
+    politician = relationship("Politician", back_populates="positions")
     parliament_periods = relationship("Parliament_period", back_populates="positions")
     position_statements = relationship("Position_statement", back_populates="positions")
 
