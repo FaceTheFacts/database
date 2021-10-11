@@ -17,7 +17,6 @@ from connection import Session, engine
 from fetch import (
     committee_fetch,
     constituency_fetch,
-    country_fetch,
     city_fetch,
     election_program_fetch,
     electoral_list_fetch,
@@ -29,6 +28,7 @@ from fetch import (
     topic_fetch,
 )
 import json
+from fetch import fetch_entity
 
 import sys
 
@@ -53,17 +53,20 @@ class Country(Base):
     sidejobs = relationship("Sidejob", back_populates="country")
 
 
-def insert_country(data: list):
-    data_list = []
-    for datum in data:
-        new_country = Country(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-        )
-        data_list.append(new_country)
-    session.add_all(data_list)
+def populate_countries() -> None:
+    api_countries = fetch_entity("countries")
+    session = Session()
+    session.add_all(
+        [
+            Country(
+                id=api_country["id"],
+                entity_type=api_country["entity_type"],
+                label=api_country["label"],
+                api_url=api_country["api_url"],
+            )
+            for api_country in api_countries
+        ]
+    )
     session.commit()
     session.close()
 
@@ -1255,7 +1258,7 @@ if __name__ == "__main__":
     # Topic.update_parent_id(topic_fetch())
     # Committee.insert_committee(committee_fetch())
     # Committee_has_topic.insert_committee_has_topic(committee_fetch())
-    # insert_country(country_fetch())
+    # populate_countries()
     # insert_city(city_fetch())
     # insert_party(party_fetch())
     # insert_politician(politician_fetch())
