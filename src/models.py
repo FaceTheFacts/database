@@ -427,20 +427,28 @@ class Committee(Base):
     )
     polls = relationship("Poll", back_populates="committee")
 
-    def insert_committee(data: list):
-        data_list = []
-        for datum in data:
-            new_data = Committee(
-                id=datum["id"],
-                entity_type=datum["entity_type"],
-                label=datum["label"],
-                api_url=datum["api_url"],
-                field_legislature_id=datum["field_legislature"]["id"],
-            )
-            data_list.append(new_data)
-        session.add_all(data_list)
-        session.commit()
-        session.close()
+
+def populate_committees():
+    api_committees = load_entity("committees")
+    committees = [
+        {
+            "id": api_committee["id"],
+            "entity_type": api_committee["entity_type"],
+            "label": api_committee["label"],
+            "api_url": api_committee["api_url"],
+            "field_legislature_id": api_committee["field_legislature"]["id"],
+        }
+        for api_committee in api_committees
+    ]
+    stmt = insert(Committee).values(committees)
+    stmt = stmt.on_conflict_do_update(
+        constraint="committee_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session = Session()
+    session.execute(stmt)
+    session.commit()
+    session.close()
 
 
 class Committee_has_topic(Base):
@@ -1284,16 +1292,18 @@ class Position(Base):
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    # populate_vote()
-    # PositionStatement.insert_position_statement()
-    # Position.insert_position()
-    # Position_statement.insert_position_statement()
-    # Committee.insert_committee(committee_fetch())
-    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
     # populate_countries()
     # populate_cities()
     # populate_parties()
     # populate_politicians()
     # populate_parliaments()
     # populate_parliament_periods()
-    populate_topics()
+    # populate_topics()
+    # populate_committees()
+
+    # populate_vote()
+    # PositionStatement.insert_position_statement()
+    # Position.insert_position()
+    # Position_statement.insert_position_statement()
+    # Committee.insert_committee(committee_fetch())
+    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
