@@ -2,6 +2,7 @@ from typing import Any, TypedDict
 import requests
 import time
 import math
+from utils import read_json, write_json, has_valid_file
 
 
 PAGE_SIZE = 999
@@ -46,6 +47,18 @@ def fetch_entity(entity: str) -> list[Any]:
     return entities
 
 
+def load_entity(entity: str) -> list[Any]:
+    file_path = f"src/static/{entity}.json"
+    has_file = has_valid_file(file_path)
+    if not has_file:
+        data = fetch_entity(entity)
+        write_json(file_path, data)
+        return data
+
+    data: list[Any] = read_json(file_path)
+    return data
+
+
 def fetch(entity: str):
     begin = time.time()
     BASE_URL = "https://www.abgeordnetenwatch.de/api/v2/{entity}?&page={page}&pager_limit={pager_limit}"
@@ -73,6 +86,8 @@ def fetch(entity: str):
     print(f"Total runtime of fetching is {end - begin}")
     return fetched_data_list
 
+
+# load_entity("parties")
 
 # Categories without foreign keys
 def party_fetch():
