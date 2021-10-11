@@ -7,6 +7,7 @@ from sqlalchemy import (
     Date,
     Boolean,
     ForeignKey,
+    BigInteger,
     Float,
     select,
     Text,
@@ -27,6 +28,7 @@ from fetch import (
     politician_fetch,
     topic_fetch,
 )
+import json
 
 import sys
 
@@ -149,6 +151,7 @@ class Politician(Base):
     party = relationship("Party")
     # One to Many
     candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
+    positions = relationship("Position", back_populates="politician")
 
 
 def insert_politician(data: list):
@@ -205,6 +208,8 @@ class Parliament_period(Base):
         "Candidacy_mandate", back_populates="parliament_period"
     )
     polls = relationship("Poll", back_populates="parliament_period")
+
+    positions = relationship("Position", back_populates="parliament_periods")
 
 
 def insert_parliament_period(data: list):
@@ -331,6 +336,7 @@ class Topic(Base):
         secondary="sidejob_has_topic",
         back_populates="topics",
     )
+    position_statements = relationship("Position_statement", back_populates="topics")
 
     def insert_topic(data: list):
         data_list = []
@@ -918,6 +924,7 @@ class Vote(Base):
     fraction = relationship("Fraction", back_populates="votes")
     poll = relationship("Poll", back_populates="votes")
 
+
 def poll_ids_list_generator():
     data_list = []
     data = json_fetch("poll")
@@ -1160,7 +1167,99 @@ def populate_sidejob_has_topic():
     session.close()
 
 
+class Position_statement(Base):
+    __tablename__ = "position_statement"
+    # id has the following structure parliament_period + statement_number (130 + 1 -> 1301)
+    id = Column(Integer(), primary_key=True)
+    statement = Column(String)
+    topic_id = Column(Integer, ForeignKey("topic.id"))
+    topics = relationship("Topic", back_populates="position_statements")
+    positions = relationship("Position", back_populates="position_statements")
+
+    def insert_position_statement():
+        data_list = []
+        # parliament period needs to match the assumptions of the state
+        parliament_period = "130"
+        # add json file with the assumptions to the src directory
+        file = "src/mecklenburg-vorpommern-assumptions.json"
+        with open(file) as f:
+            data = json.load(f)
+            for assumption in data:
+                i = parliament_period + str(assumption["number"])
+                newData = Position_statement(
+                    id=int(i),
+                    statement=assumption["text"],
+                    topic_id=assumption["topic"],
+                )
+                data_list.append(newData)
+            session.add_all(data_list)
+            session.commit()
+            session.close()
+
+
+class Position(Base):
+    __tablename__ = "position"
+    # id has the following structure parliament_period + statement_number (130 + 1 -> 1301)
+    id = Column(BigInteger, primary_key=True)
+    position = Column(String)
+    reason = Column(String())
+    politician_id = Column(Integer, ForeignKey("politician.id"))
+    parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
+    position_statement_id = Column(Integer, ForeignKey("position_statement.id"))
+    politician = relationship("Politician", back_populates="positions")
+    parliament_periods = relationship("Parliament_period", back_populates="positions")
+    position_statements = relationship("Position_statement", back_populates="positions")
+
+    def insert_position():
+        data_list = []
+        # parliament period needs to match the assumptions of the state
+        parliament_period = "130"
+        # add json file with the assumptions to the src directory
+        file = "src/mecklenburg-vorpommern-positions.json"
+        with open(file) as f:
+            data = json.load(f)
+            for politician in data:
+                for position_data in data[politician]:
+                    pk_id = (
+                        parliament_period
+                        + str(politician)
+                        + str(list(position_data.keys())[0])
+                    )
+                    fk_id = parliament_period + str(list(position_data.keys())[0])
+                    newData = Position(
+                        id=int(pk_id),
+                        position=position_data[list(position_data.keys())[0]][
+                            "position"
+                        ],
+                        reason=position_data[list(position_data.keys())[0]]["reason"]
+                        if "reason" in position_data[list(position_data.keys())[0]]
+                        else None,
+                        politician_id=int(politician),
+                        parliament_period_id=int(parliament_period),
+                        position_statement_id=int(fk_id),
+                    )
+                    data_list.append(newData)
+            session.add_all(data_list)
+            session.commit()
+            session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    populate_vote()
+    # populate_vote()
+    # PositionStatement.insert_position_statement()
+    # Position.insert_position()
+    # Position_statement.insert_position_statement()
+    # Topic.insert_topic(topic_fetch())
+    # Topic.update_parent_id(topic_fetch())
+    # Committee.insert_committee(committee_fetch())
+    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
+    # insert_country(country_fetch())
+    # insert_city(city_fetch())
+    # insert_party(party_fetch())
+    # insert_politician(politician_fetch())
+    # insert_parliament_period(parliament_period_fetch())
+    # insert_parliament(parliament_fetch())
+    # update_previous_period_id(parliament_period_fetch())
+    # update_current_project_id(parliament_fetch())
