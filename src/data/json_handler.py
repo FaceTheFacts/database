@@ -1,6 +1,6 @@
 import json
 import sys
-
+import os
 
 sys.path.append("src")
 from fetch import fetch
@@ -23,6 +23,14 @@ def json_fetch(file_name: str) -> any:
     return data
 
 
+def cv_json_file_numbers_generator():
+    number_list = []
+    path = "src/data/json/cv"
+    files = os.listdir(path)
+    for file in files:
+        number_list.append(int(file.replace(".json", "")))
+    number_list
+
+
 if __name__ == "__main__":
-    data = fetch("sidejobs")
-    json_generator(data, "sidejob")
+    cv_json_file_numbers_generator()
