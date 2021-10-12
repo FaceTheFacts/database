@@ -697,18 +697,21 @@ class FractionMembership(Base):
 
 
 def populate_fraction_memberships() -> None:
-    api_fraction_memberships = read_json("src/static/fraction_membership_fraction.json")
-    fraction_memberships = [
-        {
-            "id": api_fraction_membership["id"],
-            "entity_type": api_fraction_membership["entity_type"],
-            "label": api_fraction_membership["label"],
-            "fraction_id": api_fraction_membership["fraction_id"],
-            "valid_from": api_fraction_membership["valid_from"],
-            "valid_until": api_fraction_membership["valid_until"],
-        }
-        for api_fraction_membership in api_fraction_memberships
-    ]
+    api_candidacies_mandates = load_entity("candidacies-mandates")
+    fraction_memberships = []
+    for api_candidacies_mandate in api_candidacies_mandates:
+        fraction_membership = api_candidacies_mandate.get("fraction_membership")
+        if fraction_membership:
+            membership = fraction_membership[0]
+            new_fraction_membership = {
+                "id": membership["id"],
+                "entity_type": membership["entity_type"],
+                "label": membership["label"],
+                "fraction_id": membership["fraction"]["id"],
+                "valid_from": membership["valid_from"],
+                "valid_until": membership["valid_until"],
+            }
+            fraction_memberships.append(new_fraction_membership)
     session = Session()
     stmt = insert(FractionMembership).values(fraction_memberships)
     stmt = stmt.on_conflict_do_update(
@@ -1418,8 +1421,8 @@ if __name__ == "__main__":
     # populate_constituencies()
     # populate_electoral_lists()
     # populate_election_programs()
-    # populate_fraction_memberships()
-    # populate_electoral_data()
+    populate_fraction_memberships()
+    populate_electoral_data()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
