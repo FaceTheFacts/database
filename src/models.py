@@ -152,6 +152,7 @@ class Politician(Base):
     # One to Many
     candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
     positions = relationship("Position", back_populates="politician")
+    cvs = relationship("CV", back_populates="politician")
 
 
 def insert_politician(data: list):
@@ -1244,22 +1245,17 @@ class Position(Base):
             session.close()
 
 
+class CV(Base):
+    __tablename__ = "cv"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    politician_id = Column(Integer, ForeignKey("politician.id"))
+    raw_text = Column(String)
+    label = Column(String)
+    cv_date = Column(String)
+    # Many to One
+    politician = relationship("Politician", back_populates="cvs")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    # populate_vote()
-    # PositionStatement.insert_position_statement()
-    # Position.insert_position()
-    # Position_statement.insert_position_statement()
-    # Topic.insert_topic(topic_fetch())
-    # Topic.update_parent_id(topic_fetch())
-    # Committee.insert_committee(committee_fetch())
-    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
-    # insert_country(country_fetch())
-    # insert_city(city_fetch())
-    # insert_party(party_fetch())
-    # insert_politician(politician_fetch())
-    # insert_parliament_period(parliament_period_fetch())
-    # insert_parliament(parliament_fetch())
-    # update_previous_period_id(parliament_period_fetch())
-    # update_current_project_id(parliament_fetch())
