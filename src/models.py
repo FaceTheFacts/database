@@ -120,7 +120,7 @@ class Party(Base):
     full_name = Column(String)
     short_name = Column(String)
     # One to Many
-    candidacy_mandates = relationship("Candidacy_mandate", back_populates="party")
+    candidacy_mandates = relationship("CandidacyMandate", back_populates="party")
 
 
 def populate_parties() -> None:
@@ -172,14 +172,13 @@ class Politician(Base):
     field_title = Column(String)
     party = relationship("Party")
     # One to Many
-    candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
-    positions = relationship("Position", back_populates="politician")
-    cvs = relationship("CV", back_populates="politician")
+    candidacy_mandates = relationship("CandidacyMandate", back_populates="politician")
+    positions = relationship("Position", back_populates="politicians")
 
 
 def populate_politicians() -> None:
-    begin_time = time.time()
     api_politicians = load_entity("politicians")
+    begin_time = time.time()
     politicians = [
         {
             "id": api_politician["id"],
@@ -320,7 +319,7 @@ class ParliamentPeriod(Base):
     parliament = relationship("Parliament")
     # One to Many
     candidacy_mandates = relationship(
-        "Candidacy_mandate", back_populates="parliament_period"
+        "CandidacyMandate", back_populates="parliament_period"
     )
     polls = relationship("Poll", back_populates="parliament_period")
 
@@ -692,7 +691,7 @@ class FractionMembership(Base):
     fraction = relationship("Fraction", back_populates="fraction_membership")
     # One to One
     candidacy_mandate = relationship(
-        "Candidacy_mandate", back_populates="fraction_membership"
+        "CandidacyMandate", back_populates="fraction_membership"
     )
 
 
@@ -738,7 +737,7 @@ class ElectoralData(Base):
     constituency = relationship("Constituency", back_populates="electoral_data")
     # One to One
     candidacy_mandate = relationship(
-        "Candidacy_mandate", back_populates="electoral_data"
+        "CandidacyMandate", back_populates="electoral_data"
     )
 
 
@@ -777,7 +776,7 @@ def populate_electoral_data():
     session.close()
 
 
-class Candidacy_mandate(Base):
+class CandidacyMandate(Base):
     __tablename__ = "candidacy_mandate"
     id = Column(Integer, primary_key=True)
     entity_type = Column(String)
@@ -820,34 +819,60 @@ class Candidacy_mandate(Base):
     )
 
 
-def insert_candidacy_mandate():
-    data_list = []
-    data = json_fetch("candidacy_mandate_ids")
-    for datum in data:
-        new_datum = Candidacy_mandate(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            id_external_administration=datum["id_external_administration"],
-            id_external_administration_description=datum[
+def populate_candidacies_mandates() -> None:
+    api_candidacies_mandates = load_entity("candidacies-mandates")
+    begin_time = time.time()
+    candidacies_mandates = [
+        {
+            "id": api_candidacies_mandate["id"],
+            "entity_type": api_candidacies_mandate["entity_type"],
+            "label": api_candidacies_mandate["label"],
+            "api_url": api_candidacies_mandate["api_url"],
+            "id_external_administration": api_candidacies_mandate[
+                "id_external_administration"
+            ],
+            "id_external_administration_description": api_candidacies_mandate[
                 "id_external_administration_description"
             ],
-            type=datum["type"],
-            parliament_period_id=datum["parliament_period_id"],
-            politician_id=datum["politician_id"],
-            party_id=datum["party_id"],
-            start_date=datum["start_date"],
-            end_date=datum["end_date"],
-            info=datum["info"],
-            electoral_data_id=datum["electoral_data_id"],
-            fraction_membership_id=datum["fraction_membership_id"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+            "type": api_candidacies_mandate["type"],
+            "parliament_period_id": api_candidacies_mandate["parliament_period"]["id"]
+            if api_candidacies_mandate["parliament_period"]
+            else None,
+            "politician_id": api_candidacies_mandate["politician"]["id"]
+            if api_candidacies_mandate["politician"]
+            else None,
+            # Some dict don't include party itsself
+            "party_id": api_candidacies_mandate["party"]["id"]
+            if api_candidacies_mandate.get("party")
+            else None,
+            "start_date": api_candidacies_mandate["start_date"],
+            "end_date": api_candidacies_mandate["end_date"],
+            "info": api_candidacies_mandate["info"],
+            "electoral_data_id": api_candidacies_mandate["electoral_data"]["id"]
+            if api_candidacies_mandate["electoral_data"]
+            else None,
+            # Some dict don't include fraction_membership itsself
+            "fraction_membership_id": api_candidacies_mandate["fraction_membership"][0][
+                "id"
+            ]
+            if api_candidacies_mandate.get("fraction_membership")
+            else None,
+        }
+        for api_candidacies_mandate in api_candidacies_mandates
+    ]
+    session = Session()
+    stmt = insert(CandidacyMandate).values(candidacies_mandates)
+    stmt = stmt.on_conflict_do_update(
+        constraint="candidacy_mandate_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
+    end_time = time.time()
+    print(
+        f"Total runtime to store {len(candidacies_mandates)} data is {end_time - begin_time}"
+    )
 
 
 class Committee_membership(Base):
@@ -862,7 +887,7 @@ class Committee_membership(Base):
     # Many to One
     committee = relationship("Committee", back_populates="committee_memberships")
     candidacy_mandate = relationship(
-        "Candidacy_mandate", back_populates="committee_memberships"
+        "CandidacyMandate", back_populates="committee_memberships"
     )
 
 
@@ -1017,7 +1042,7 @@ class Vote(Base):
     reason_no_show = Column(String)
     reason_no_show_other = Column(String)
     # Many to One
-    candidacy_mandate = relationship("Candidacy_mandate", back_populates="votes")
+    candidacy_mandate = relationship("CandidacyMandate", back_populates="votes")
     fraction = relationship("Fraction", back_populates="votes")
     poll = relationship("Poll", back_populates="votes")
 
@@ -1151,7 +1176,7 @@ class Sidejob(Base):
     country = relationship("Country", back_populates="sidejobs")
     # Many to Many
     candidacy_mandates = relationship(
-        "Candidacy_mandate",
+        "CandidacyMandate",
         secondary="sidejob_has_mandate",
         back_populates="sidejobs",
     )
@@ -1421,8 +1446,9 @@ if __name__ == "__main__":
     # populate_constituencies()
     # populate_electoral_lists()
     # populate_election_programs()
-    populate_fraction_memberships()
-    populate_electoral_data()
+    # populate_fraction_memberships()
+    # populate_electoral_data()
+    # populate_candidacies_mandates()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
