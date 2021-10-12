@@ -25,6 +25,7 @@ from fetch import (
 import json
 from fetch import load_entity
 from utils import read_json
+from parser import get_electoral_data_list
 
 import sys
 
@@ -536,7 +537,7 @@ class Constituency(Base):
     # TODO: parliament_period might only be a query parameter
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("ParliamentPeriod")
-    electoral_data = relationship("Electoral_data", back_populates="constituency")
+    electoral_data = relationship("ElectoralData", back_populates="constituency")
 
 
 def populate_constituencies() -> None:
@@ -572,7 +573,7 @@ class ElectoralList(Base):
     name = Column(String)
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("ParliamentPeriod")
-    electoral_data = relationship("Electoral_data", back_populates="electoral_list")
+    electoral_data = relationship("ElectoralData", back_populates="electoral_list")
 
 
 def populate_electoral_lists() -> None:
@@ -719,7 +720,7 @@ def populate_fraction_memberships() -> None:
     session.close()
 
 
-class Electoral_data(Base):
+class ElectoralData(Base):
     __tablename__ = "electoral_data"
     id = Column(Integer, primary_key=True)
     entity_type = Column(String)
@@ -738,25 +739,38 @@ class Electoral_data(Base):
     )
 
 
-def insert_electoral_data():
-    data_list = []
-    data = json_fetch("electoral_data_ids")
-    for datum in data:
-        new_datum = Electoral_data(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            electoral_list_id=datum["electoral_list_id"],
-            list_position=datum["list_position"],
-            constituency_id=datum["constituency_id"],
-            constituency_result=datum["constituency_result"],
-            constituency_result_count=datum["constituency_result_count"],
-            mandate_won=datum["mandate_won"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_electoral_data():
+    api_candidacies_mandates = load_entity("candidacies-mandates")
+    electoral_data_list = []
+    for api_candidacies_mandate in api_candidacies_mandates:
+        electoral_data = api_candidacies_mandate["electoral_data"]
+        if electoral_data:
+            new_electoral_data = {
+                "id": electoral_data["id"],
+                "entity_type": electoral_data["entity_type"],
+                "label": electoral_data["label"],
+                "electoral_list_id": electoral_data["electoral_list"]["id"]
+                if electoral_data["electoral_list"]
+                else None,
+                "list_position": electoral_data["list_position"],
+                "constituency_id": electoral_data["constituency"]["id"]
+                if electoral_data["constituency"]
+                else None,
+                "constituency_result": electoral_data["constituency_result"],
+                "constituency_result_count": electoral_data[
+                    "constituency_result_count"
+                ],
+                "mandate_won": electoral_data["mandate_won"],
+            }
+            electoral_data_list.append(new_electoral_data)
+    session = Session()
+    stmt = insert(ElectoralData).values(electoral_data_list)
+    stmt = stmt.on_conflict_do_update(
+        constraint="electoral_data_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -785,7 +799,7 @@ class Candidacy_mandate(Base):
     party = relationship("Party", back_populates="candidacy_mandates")
     # One to One
     electoral_data = relationship(
-        "Electoral_data", back_populates="candidacy_mandate", uselist=False
+        "ElectoralData", back_populates="candidacy_mandate", uselist=False
     )
     fraction_membership = relationship(
         "FractionMembership", back_populates="candidacy_mandate", uselist=False
@@ -1405,6 +1419,7 @@ if __name__ == "__main__":
     # populate_electoral_lists()
     # populate_election_programs()
     # populate_fraction_memberships()
+    # populate_electoral_data()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
