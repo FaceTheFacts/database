@@ -24,6 +24,7 @@ from fetch import (
 )
 import json
 from fetch import load_entity
+from utils import read_json
 
 import sys
 
@@ -492,7 +493,7 @@ class Fraction(Base):
     short_name = Column(String)
     legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("ParliamentPeriod")
-    fraction_membership = relationship("Fraction_membership", back_populates="fraction")
+    fraction_membership = relationship("FractionMembership", back_populates="fraction")
     # One to Many
     votes = relationship("Vote", back_populates="fraction")
 
@@ -679,7 +680,7 @@ def populate_election_programs() -> None:
     session.close()
 
 
-class Fraction_membership(Base):
+class FractionMembership(Base):
     __tablename__ = "fraction_membership"
     id = Column(Integer, primary_key=True)
     entity_type = Column(String)
@@ -694,22 +695,27 @@ class Fraction_membership(Base):
     )
 
 
-def insert_fraction_membership():
-    data_list = []
-    data = json_fetch("fraction_membership_fraction")
-    for datum in data:
-        new_datum = Fraction_membership(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            fraction_id=datum["fraction_id"],
-            valid_from=datum["valid_from"],
-            valid_until=datum["valid_until"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_fraction_memberships() -> None:
+    api_fraction_memberships = read_json("src/static/fraction_membership_fraction.json")
+    fraction_memberships = [
+        {
+            "id": api_fraction_membership["id"],
+            "entity_type": api_fraction_membership["entity_type"],
+            "label": api_fraction_membership["label"],
+            "fraction_id": api_fraction_membership["fraction_id"],
+            "valid_from": api_fraction_membership["valid_from"],
+            "valid_until": api_fraction_membership["valid_until"],
+        }
+        for api_fraction_membership in api_fraction_memberships
+    ]
+    session = Session()
+    stmt = insert(FractionMembership).values(fraction_memberships)
+    stmt = stmt.on_conflict_do_update(
+        constraint="fraction_membership_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -782,7 +788,7 @@ class Candidacy_mandate(Base):
         "Electoral_data", back_populates="candidacy_mandate", uselist=False
     )
     fraction_membership = relationship(
-        "Fraction_membership", back_populates="candidacy_mandate", uselist=False
+        "FractionMembership", back_populates="candidacy_mandate", uselist=False
     )
     # One to Many
     committee_memberships = relationship(
@@ -1398,6 +1404,7 @@ if __name__ == "__main__":
     # populate_constituencies()
     # populate_electoral_lists()
     # populate_election_programs()
+    # populate_fraction_memberships()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
