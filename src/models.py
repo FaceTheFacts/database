@@ -225,8 +225,8 @@ class Parliament(Base):
     api_url = Column(String)
     abgeordnetenwatch_url = Column(String)
     label_external_long = Column(String)
-    # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
 
+    # current_project_id = Column(Integer, ForeignKey("parliament_period.id"))
     # parliament_period = relationship("ParliamentPeriod")
 
 
@@ -623,7 +623,7 @@ def link_checker_election_program():
     print("{} in total have uris".format(len(data_list)))
 
 
-class Election_program(Base):
+class ElectionProgram(Base):
     __tablename__ = "election_program"
     id = Column(Integer(), primary_key=True)
     entity_type = Column(String)
@@ -636,31 +636,40 @@ class Election_program(Base):
     link_option = Column(String)
     file = Column(String)
     parliament_period = relationship("ParliamentPeriod")
-    Party = relationship("Party")
+    party = relationship("Party")
 
 
-def insert_election_program(data):
-    data_list = []
-    for datum in data:
-        link = datum["link"][0]
-        new_datum = Election_program(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            parliament_period_id=datum["parliament_period"]["id"]
-            if datum["parliament_period"]
+def populate_election_programs() -> None:
+    api_election_programs = load_entity("election-program")
+    election_programs = [
+        {
+            "id": api_election_program["id"],
+            "entity_type": api_election_program["entity_type"],
+            "label": api_election_program["label"],
+            "api_url": api_election_program["api_url"],
+            "parliament_period_id": api_election_program["parliament_period"]["id"]
+            if api_election_program["parliament_period"]
             else None,
-            party_id=datum["party"]["id"] if datum["party"] else None,
-            link_uri=link["uri"],
-            link_title=link["title"],
-            link_option=link["option"] if link.get("option") else None,
-            file=datum["file"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+            "party_id": api_election_program["party"]["id"]
+            if api_election_program["party"]
+            else None,
+            "link_uri": api_election_program["link"][0]["uri"],
+            "link_title": api_election_program["link"][0]["title"],
+            "link_option": api_election_program["link"][0]["option"]
+            if api_election_program["link"][0].get("option")
+            else None,
+            "file": api_election_program["file"],
+        }
+        for api_election_program in api_election_programs
+    ]
+    stmt = insert(ElectionProgram).values(election_programs)
+    stmt = stmt.on_conflict_do_update(
+        constraint="election_program_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session = Session()
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1318,6 +1327,7 @@ if __name__ == "__main__":
     # populate_fractions()
     # populate_constituencies()
     # populate_electoral_lists()
+    # populate_election_programs()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
