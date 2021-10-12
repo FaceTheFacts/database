@@ -18,7 +18,6 @@ from connection import Session, engine
 from fetch import (
     committee_fetch,
     constituency_fetch,
-    election_program_fetch,
     electoral_list_fetch,
     fraction_fetch,
     topic_fetch,
@@ -557,7 +556,7 @@ def populate_constituencies() -> None:
     session.close()
 
 
-class Electoral_list(Base):
+class ElectoralList(Base):
     __tablename__ = "electoral_list"
     id = Column(Integer(), primary_key=True)
     entity_type = Column(String)
@@ -569,29 +568,35 @@ class Electoral_list(Base):
     electoral_data = relationship("Electoral_data", back_populates="electoral_list")
 
 
-def insert_electoral_list(data):
-    data_list = []
-    for datum in data:
-        new_datum = Electoral_list(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            name=datum["name"],
-            parliament_period_id=datum["parliament_period"]["id"]
-            if datum["parliament_period"]
+def populate_electoral_lists() -> None:
+    api_electoral_lists = load_entity("electoral-lists")
+    electoral_lists = [
+        {
+            "id": api_electoral_list["id"],
+            "entity_type": api_electoral_list["entity_type"],
+            "label": api_electoral_list["label"],
+            "api_url": api_electoral_list["api_url"],
+            "name": api_electoral_list["name"],
+            "parliament_period_id": api_electoral_list["parliament_period"]["id"]
+            if api_electoral_list["parliament_period"]
             else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+        }
+        for api_electoral_list in api_electoral_lists
+    ]
+    session = Session()
+    stmt = insert(ElectoralList).values(electoral_lists)
+    stmt = stmt.on_conflict_do_update(
+        constraint="electoral_list_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
 def link_length_checker_election_program():
     data_list = []
-    data = election_program_fetch()
+    data = load_entity("election-program")
     length_of_data = len(data)
     for datum in data:
         link = datum["link"]
@@ -605,7 +610,7 @@ def link_length_checker_election_program():
 
 def link_checker_election_program():
     data_list = []
-    data = election_program_fetch()
+    data = load_entity("election-program")
     length_of_data = len(data)
     for datum in data:
         id = datum["id"]
@@ -704,7 +709,7 @@ class Electoral_data(Base):
     constituency_result = Column(Float)
     constituency_result_count = Column(Integer)
     mandate_won = Column(String)
-    electoral_list = relationship("Electoral_list", back_populates="electoral_data")
+    electoral_list = relationship("ElectoralList", back_populates="electoral_data")
     constituency = relationship("Constituency", back_populates="electoral_data")
     # One to One
     candidacy_mandate = relationship(
@@ -1311,7 +1316,8 @@ if __name__ == "__main__":
     # populate_committees()
     # populate_committee_has_topic()
     # populate_fractions()
-    populate_constituencies()
+    # populate_constituencies()
+    # populate_electoral_lists()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
