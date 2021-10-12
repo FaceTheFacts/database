@@ -527,26 +527,33 @@ class Constituency(Base):
     api_url = Column(String)
     name = Column(String)
     number = Column(Integer)
+    # TODO: parliament_period might only be a query parameter
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     parliament_period = relationship("ParliamentPeriod")
     electoral_data = relationship("Electoral_data", back_populates="constituency")
 
 
-def insert_constituency(data):
-    data_list = []
-    for datum in data:
-        new_datum = Constituency(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            name=datum["name"],
-            number=datum["number"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_constituencies() -> None:
+    api_constituencies = load_entity("constituencies")
+    constituencies = [
+        {
+            "id": api_constituency["id"],
+            "entity_type": api_constituency["entity_type"],
+            "label": api_constituency["label"],
+            "api_url": api_constituency["api_url"],
+            "name": api_constituency["name"],
+            "number": api_constituency["number"],
+        }
+        for api_constituency in api_constituencies
+    ]
+    session = Session()
+    stmt = insert(Constituency).values(constituencies)
+    stmt = stmt.on_conflict_do_update(
+        constraint="constituency_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1304,6 +1311,7 @@ if __name__ == "__main__":
     # populate_committees()
     # populate_committee_has_topic()
     # populate_fractions()
+    populate_constituencies()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
