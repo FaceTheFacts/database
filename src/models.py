@@ -538,20 +538,6 @@ class Constituency(Base):
     electoral_data = relationship("Electoral_data", back_populates="constituency")
 
 
-def isParliamentPeriod():
-    result = 0
-    data = constituency_fetch()
-    for datum in data:
-        paliament_period = datum.get("paliament_period")
-        if paliament_period:
-            result += 1
-    print(
-        "Constituency included {result} 'paliament_period' in total out of {len_fetched_data} data".format(
-            result=result, len_fetched_data=len(data)
-        )
-    )
-
-
 def insert_constituency(data):
     data_list = []
     for datum in data:
