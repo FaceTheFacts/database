@@ -457,23 +457,30 @@ def populate_committees():
     session.close()
 
 
-class Committee_has_topic(Base):
+class CommitteeHasTopic(Base):
     __tablename__ = "committee_has_topic"
     committee_id = Column(Integer(), ForeignKey("committee.id"), primary_key=True)
     topic_id = Column(Integer(), ForeignKey("topic.id"), primary_key=True)
 
-    def insert_committee_has_topic(data: list):
-        data_list = []
-        for datum in data:
-            if datum["field_topics"]:
-                for topic in datum["field_topics"]:
-                    new_data = Committee_has_topic(
-                        committee_id=datum["id"], topic_id=topic["id"]
-                    )
-                    data_list.append(new_data)
-        session.add_all(data_list)
-        session.commit()
-        session.close()
+
+def populate_committee_has_topic() -> None:
+    api_committees = load_entity("committees")
+    committee_topics = []
+    for api_committee in api_committees:
+        field_topics = api_committee["field_topics"]
+        if field_topics:
+            for topic in field_topics:
+                committee_topic = {
+                    "committee_id": api_committee["id"],
+                    "topic_id": topic["id"],
+                }
+                committee_topics.append(committee_topic)
+    stmt = insert(CommitteeHasTopic).values(committee_topics)
+    stmt = stmt.on_conflict_do_nothing()
+    session = Session()
+    session.execute(stmt)
+    session.commit()
+    session.close()
 
 
 class Fraction(Base):
@@ -1370,10 +1377,10 @@ if __name__ == "__main__":
     # populate_parliament_periods()
     # populate_topics()
     # populate_committees()
+    populate_committee_has_topic()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
     # Position.insert_position()
     # Position_statement.insert_position_statement()
     # Committee.insert_committee(committee_fetch())
-    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
