@@ -429,7 +429,7 @@ class Committee(Base):
     )
     # One to Many
     committee_memberships = relationship(
-        "Committee_membership", back_populates="committee"
+        "CommitteeMembership", back_populates="committee"
     )
     polls = relationship("Poll", back_populates="committee")
 
@@ -808,7 +808,7 @@ class CandidacyMandate(Base):
     )
     # One to Many
     committee_memberships = relationship(
-        "Committee_membership", back_populates="candidacy_mandate"
+        "CommitteeMembership", back_populates="candidacy_mandate"
     )
     votes = relationship("Vote", back_populates="candidacy_mandate")
     # Many to Many
@@ -875,7 +875,7 @@ def populate_candidacies_mandates() -> None:
     )
 
 
-class Committee_membership(Base):
+class CommitteeMembership(Base):
     __tablename__ = "committee_membership"
     id = Column(Integer, primary_key=True)
     entity_type = Column(String)
@@ -891,42 +891,48 @@ class Committee_membership(Base):
     )
 
 
-def is_exist_committee(id: int) -> Boolean:
-    command = select(Committee.id).where(Committee.id == id)
-    result = session.execute(command).fetchone()
-    if result != None:
-        return True
-    else:
-        return False
-
-
-def insert_committee_membership():
-    begin = time.time()
-    committee_membership = []
-    non_committee_data = []
-    data = json_fetch("committee_membership_ids")
-    for datum in data:
-        is_exist_in_committee = is_exist_committee(datum["committee_id"])
-        if is_exist_in_committee:
-            new_datum = Committee_membership(
-                id=datum["id"],
-                entity_type=datum["entity_type"],
-                label=datum["label"],
-                api_url=datum["api_url"],
-                committee_id=datum["committee_id"],
-                candidacy_mandate_id=datum["candidacy_mandate_id"],
-                committee_role=datum["committee_role"],
-            )
-            committee_membership.append(new_datum)
-        else:
-            non_committee_data.append(datum)
-    session.add_all(committee_membership)
+def populate_committee_memberships() -> None:
+    api_committees = load_entity("committees")
+    committee_ids = set([api_committee["id"] for api_committee in api_committees])
+    api_committee_memberships = load_entity("committee-memberships")
+    begin_time = time.time()
+    committee_memberships = []
+    for api_committee_membership in api_committee_memberships:
+        committee_id = (
+            api_committee_membership["committee"]["id"]
+            if api_committee_membership["committee"]
+            else None
+        )
+        if committee_id in committee_ids:
+            new_membership = {
+                "id": api_committee_membership["id"],
+                "entity_type": api_committee_membership["entity_type"],
+                "label": api_committee_membership["label"],
+                "api_url": api_committee_membership["api_url"],
+                "committee_id": api_committee_membership["committee"]["id"]
+                if api_committee_membership["committee"]
+                else None,
+                "candidacy_mandate_id": api_committee_membership["candidacy_mandate"][
+                    "id"
+                ]
+                if api_committee_membership["candidacy_mandate"]
+                else None,
+                "committee_role": api_committee_membership["committee_role"],
+            }
+            committee_memberships.append(new_membership)
+    session = Session()
+    stmt = insert(CommitteeMembership).values(committee_memberships)
+    stmt = stmt.on_conflict_do_update(
+        constraint="committee_membership_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(committee_membership)))
-    json_generator(non_committee_data, "non_committee_committee_membership")
-    end = time.time()
-    print(f"Total runtime of insert is {end - begin}")
     session.close()
+    end_time = time.time()
+    print(
+        f"Total runtime to store {len(committee_memberships)} data is {end_time - begin_time}"
+    )
 
 
 class Poll(Base):
@@ -1449,6 +1455,7 @@ if __name__ == "__main__":
     # populate_fraction_memberships()
     # populate_electoral_data()
     # populate_candidacies_mandates()
+    # populate_committee_memberships()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
