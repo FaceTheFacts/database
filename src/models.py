@@ -1287,30 +1287,22 @@ class SidejobHasTopic(Base):
     topic_id = Column(Integer, ForeignKey("topic.id"), primary_key=True)
 
 
-def generate_unique_sidejob_topic_ids():
-    data_list = []
-    data = json_fetch("sidejob")
-    for datum in data:
-        if datum["field_topics"]:
-            for topic in datum["field_topics"]:
-                new_data = {
-                    "sidejob_id": datum["id"],
+def populate_sidejob_has_topic():
+    api_sidejobs = load_entity("sidejobs")
+    sidejob_topics = []
+    for api_sidejob in api_sidejobs:
+        field_topics = api_sidejob["field_topics"]
+        if field_topics:
+            for topic in field_topics:
+                sidejob_topic = {
+                    "sidejob_id": api_sidejob["id"],
                     "topic_id": topic["id"],
                 }
-                data_list.append(new_data)
-    return [dict(t) for t in {tuple(d.items()) for d in data_list}]
-
-
-def populate_sidejob_has_topic():
-    data_list = []
-    data = generate_unique_sidejob_topic_ids()
-    for datum in data:
-        new_datum = SidejobHasTopic(
-            sidejob_id=datum["sidejob_id"], topic_id=datum["topic_id"]
-        )
-        data_list.append(new_datum)
-
-    session.add_all(data_list)
+                sidejob_topics.append(sidejob_topic)
+    stmt = insert(SidejobHasTopic).values(sidejob_topics)
+    stmt = stmt.on_conflict_do_nothing()
+    session = Session()
+    session.execute(stmt)
     session.commit()
     session.close()
 
@@ -1484,6 +1476,7 @@ if __name__ == "__main__":
     # populate_sidejob_organization_has_topic()
     # populate_sidejobs()
     # populate_sidejob_has_mandate()
+    populate_sidejob_has_topic()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
