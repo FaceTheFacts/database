@@ -1,8 +1,6 @@
 .env
-src/__pycache__
-venv
 .venv
-alembic/__pycache__
-alembic/versions/__pycache__
+venv/
 
-src/data/json
+*.pyc
+__pycache__/
