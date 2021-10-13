@@ -32,4 +32,4 @@ class Topic(Base):
         secondary="sidejob_has_topic",
         back_populates="topics",
     )
-    position_statements = relationship("Position_statement", back_populates="topics")
+    position_statements = relationship("PositionStatement", back_populates="topics")

@@ -1,10 +1,9 @@
 import time
 from sqlalchemy.dialects.postgresql import insert
 
+from ..utils.file import read_json
 from ..utils.fetch import load_entity
 from ..db.session import engine, Session
-
-
 
 from ..models.country import Country
 from ..models.city import City
@@ -32,6 +31,7 @@ from ..models.sidejob_organization_has_topic import SidejobOrganizationHasTopic
 from ..models.sidejob import Sidejob
 from ..models.sidejob_has_mandate import SidejobHasMandate
 from ..models.sidejob_has_topic import SidejobHasTopic
+from ..models.position_statement import PositionStatement
 
 
 def populate_countries() -> None:
@@ -824,7 +824,7 @@ def populate_sidejob_has_mandate() -> None:
     session.close()
 
 
-def populate_sidejob_has_topic() ->None:
+def populate_sidejob_has_topic() -> None:
     api_sidejobs = load_entity("sidejobs")
     sidejob_topics = []
     for api_sidejob in api_sidejobs:
@@ -838,6 +838,31 @@ def populate_sidejob_has_topic() ->None:
                 sidejob_topics.append(sidejob_topic)
     stmt = insert(SidejobHasTopic).values(sidejob_topics)
     stmt = stmt.on_conflict_do_nothing()
+    session = Session()
+    session.execute(stmt)
+    session.commit()
+    session.close()
+
+
+def populate_position_statements() -> None:
+    # parliament period needs to match the assumptions of the state
+    PARLIAMENT_PERIOD = "130"
+    file_path = "src/static/mecklenburg-vorpommern-assumptions.json"
+    assumptions = read_json(file_path)
+    statements = []
+    for assumption in assumptions:
+        statement_id = PARLIAMENT_PERIOD + str(assumption["number"])
+        statement = {
+            "id": int(statement_id),
+            "statement": assumption["text"],
+            "topic_id": assumption["topic"],
+        }
+        statements.append(statement)
+    stmt = insert(PositionStatement).values(statements)
+    stmt = stmt.on_conflict_do_update(
+        constraint="position_statement_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
     session = Session()
     session.execute(stmt)
     session.commit()
@@ -871,4 +896,5 @@ if __name__ == "__main__":
     # populate_sidejob_organization_has_topic()
     # populate_sidejobs()
     # populate_sidejob_has_mandate()
-    populate_sidejob_has_topic()
+    # populate_sidejob_has_topic()
+    populate_position_statements()
