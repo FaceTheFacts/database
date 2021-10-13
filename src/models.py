@@ -1215,34 +1215,41 @@ class Sidejob(Base):
     )
 
 
-def populate_sidejob():
-    data_list = []
-    data = json_fetch("sidejob")
-    for datum in data:
-        new_datum = Sidejob(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            job_title_extra=datum["job_title_extra"],
-            additional_information=datum["additional_information"],
-            category=datum["category"],
-            income_level=datum["income_level"],
-            interval=datum["interval"],
-            data_change_date=datum["data_change_date"],
-            created=datum["created"],
-            sidejob_organization_id=datum["sidejob_organization"]["id"]
-            if datum["sidejob_organization"]
+def populate_sidejobs() -> None:
+    api_sidejobs = load_entity("sidejobs")
+    sidejobs = [
+        {
+            "id": api_sidejob["id"],
+            "entity_type": api_sidejob["entity_type"],
+            "label": api_sidejob["label"],
+            "api_url": api_sidejob["api_url"],
+            "job_title_extra": api_sidejob["job_title_extra"],
+            "additional_information": api_sidejob["additional_information"],
+            "category": api_sidejob["category"],
+            "income_level": api_sidejob["income_level"],
+            "interval": api_sidejob["interval"],
+            "data_change_date": api_sidejob["data_change_date"],
+            "created": api_sidejob["created"],
+            "sidejob_organization_id": api_sidejob["sidejob_organization"]["id"]
+            if api_sidejob["sidejob_organization"]
             else None,
-            field_city_id=datum["field_city"]["id"] if datum["field_city"] else None,
-            field_country_id=datum["field_country"]["id"]
-            if datum["field_country"]
+            "field_city_id": api_sidejob["field_city"]["id"]
+            if api_sidejob["field_city"]
             else None,
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+            "field_country_id": api_sidejob["field_country"]["id"]
+            if api_sidejob["field_country"]
+            else None,
+        }
+        for api_sidejob in api_sidejobs
+    ]
+    session = Session()
+    stmt = insert(Sidejob).values(sidejobs)
+    stmt = stmt.on_conflict_do_update(
+        constraint="sidejob_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1484,6 +1491,7 @@ if __name__ == "__main__":
     # populate_votes()
     # populate_sidejob_organizations()
     # populate_sidejob_organization_has_topic()
+    populate_sidejobs()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
