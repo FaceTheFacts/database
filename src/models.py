@@ -10,27 +10,18 @@ from sqlalchemy import (
     ForeignKey,
     BigInteger,
     Float,
-    select,
     Text,
 )
 from sqlalchemy.orm import session, relationship
 from connection import Session, engine
-from fetch import (
-    committee_fetch,
-    constituency_fetch,
-    electoral_list_fetch,
-    fraction_fetch,
-    topic_fetch,
-)
-import json
-from fetch import load_entity
-from utils import read_json
-from parser import get_electoral_data_list
 
+from fetch import load_entity
+
+import json
 import sys
 
 sys.path.append("src")
-from data.json_handler import json_fetch, json_generator
+
 
 Base = declarative_base()
 session = Session()
