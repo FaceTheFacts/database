@@ -33,7 +33,12 @@ import json
 import sys
 
 sys.path.append("src")
-from data.json_handler import json_fetch, json_generator
+from data.json_handler import (
+    cv_json_fetch,
+    cv_json_file_numbers_generator,
+    json_fetch,
+    json_generator,
+)
 
 Base = declarative_base()
 session = Session()
@@ -1250,12 +1255,56 @@ class CV(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     politician_id = Column(Integer, ForeignKey("politician.id"))
     raw_text = Column(String)
-    label = Column(String)
-    cv_date = Column(String)
+    short_description = Column(Text)
     # Many to One
     politician = relationship("Politician", back_populates="cvs")
+
+
+def populate_cv():
+    data_list = []
+    politician_ids = cv_json_file_numbers_generator()
+
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        bio = json_file["Biography"]
+        new_datum = CV(
+            politician_id=politician_id,
+            raw_text=bio["Raw"],
+            short_description=bio["ShortDescription"]
+        )
+        data_list.append(new_datum)
+        
+        # if type(steps) !=list:
+        #     print(politician_id)
+            # for step in steps:
+            #     new_datum = CV(
+            #         politician_id=politician_id,
+            #         raw_text=step["Raw"],
+            #         label=step["Label"],
+            #         cv_date=step["Date"],
+            #     )
+            # data_list.append(new_datum)
+            # continue
+        # else:
+            # new_datum = CV(
+            #         politician_id=politician_id,
+            #         raw_text=steps["Raw"],
+            #         label=steps["Label"],
+            #         cv_date=steps["Date"],
+            #     )
+            # data_list.append(new_datum)
+            
+            # print(steps["Raw"])
+            # print(steps["Label"])
+            # print(steps["Date"])
+
+
+    session.add_all(data_list)
+    session.commit()
+    session.close()
 
 
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
+    populate_cv()
