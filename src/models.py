@@ -945,7 +945,6 @@ class Poll(Base):
     field_intro = Column(Text)
     field_legislature_id = Column(Integer, ForeignKey("parliament_period.id"))
     field_poll_date = Column(Date)
-
     # Many to One
     committee = relationship("Committee", back_populates="polls")
     parliament_period = relationship("ParliamentPeriod", back_populates="polls")
@@ -956,28 +955,33 @@ class Poll(Base):
     votes = relationship("Vote", back_populates="poll")
 
 
-def populate_poll():
-    data_list = []
-    data = json_fetch("poll")
-    for datum in data:
-        new_datum = Poll(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            field_committees_id=datum["field_committees"][0]["id"]
-            if datum["field_committees"]
+def populate_polls() -> None:
+    api_polls = load_entity("polls")
+    polls = [
+        {
+            "id": api_polls["id"],
+            "entity_type": api_polls["entity_type"],
+            "label": api_polls["label"],
+            "api_url": api_polls["api_url"],
+            "field_committees_id": api_polls["field_committees"][0]["id"]
+            if api_polls["field_committees"]
             else None,
-            field_intro=datum["field_intro"],
-            field_legislature_id=datum["field_legislature"]["id"]
-            if datum["field_legislature"]
+            "field_intro": api_polls["field_intro"],
+            "field_legislature_id": api_polls["field_legislature"]["id"]
+            if api_polls["field_legislature"]
             else None,
-            field_poll_date=datum["field_poll_date"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+            "field_poll_date": api_polls["field_poll_date"],
+        }
+        for api_polls in api_polls
+    ]
+    session = Session()
+    stmt = insert(Poll).values(polls)
+    stmt = stmt.on_conflict_do_update(
+        constraint="poll_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -987,21 +991,23 @@ class PollHasTopic(Base):
     topic_id = Column(Integer, ForeignKey("topic.id"), primary_key=True)
 
 
-def populate_poll_has_topic():
-    data_list = []
-    data = json_fetch("poll")
-    for datum in data:
-        if datum["field_topics"]:
-            for topic in datum["field_topics"]:
-                new_data = PollHasTopic(
-                    poll_id=datum["id"],
-                    topic_id=topic["id"],
-                )
-
-                data_list.append(new_data)
-    session.add_all(data_list)
+def populate_poll_has_topic() -> None:
+    api_polls = load_entity("polls")
+    polls_topics = []
+    for api_poll in api_polls:
+        field_topics = api_poll["field_topics"]
+        if field_topics:
+            for topic in field_topics:
+                poll_topic = {
+                    "poll_id": api_poll["id"],
+                    "topic_id": topic["id"],
+                }
+                polls_topics.append(poll_topic)
+    session = Session()
+    stmt = insert(PollHasTopic).values(polls_topics)
+    stmt = stmt.on_conflict_do_nothing()
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1456,6 +1462,8 @@ if __name__ == "__main__":
     # populate_electoral_data()
     # populate_candidacies_mandates()
     # populate_committee_memberships()
+    # populate_polls()
+    # populate_poll_has_topic()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
