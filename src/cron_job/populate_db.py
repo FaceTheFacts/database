@@ -34,6 +34,13 @@ from ..models.sidejob_has_topic import SidejobHasTopic
 from ..models.position_statement import PositionStatement
 
 
+import json
+from ..models.position import Position
+from ..models.cv import CV
+from ..models.career_path import CareerPath
+from .json_handler import cv_json_fetch, cv_json_file_numbers_generator
+
+
 def populate_countries() -> None:
     api_countries = load_entity("countries")
     countries = [
@@ -865,6 +872,83 @@ def populate_position_statements() -> None:
     )
     session = Session()
     session.execute(stmt)
+    session.commit()
+    session.close()
+
+
+def insert_position():
+    data_list = []
+    # parliament period needs to match the assumptions of the state
+    parliament_period = "130"
+    # add json file with the assumptions to the src directory
+    file = "src/mecklenburg-vorpommern-positions.json"
+    with open(file) as f:
+        data = json.load(f)
+        for politician in data:
+            for position_data in data[politician]:
+                pk_id = (
+                    parliament_period
+                    + str(politician)
+                    + str(list(position_data.keys())[0])
+                )
+                fk_id = parliament_period + str(list(position_data.keys())[0])
+                newData = Position(
+                    id=int(pk_id),
+                    position=position_data[list(position_data.keys())[0]]["position"],
+                    reason=position_data[list(position_data.keys())[0]]["reason"]
+                    if "reason" in position_data[list(position_data.keys())[0]]
+                    else None,
+                    politician_id=int(politician),
+                    parliament_period_id=int(parliament_period),
+                    position_statement_id=int(fk_id),
+                )
+                data_list.append(newData)
+        session = Session()
+        session.add_all(data_list)
+        session.commit()
+        session.close()
+
+
+def populate_cv():
+    data_list = []
+    politician_ids = cv_json_file_numbers_generator()
+
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        bio = json_file["Biography"]
+        new_datum = CV(
+            politician_id=politician_id,
+            raw_text=bio["Raw"],
+            short_description=bio["ShortDescription"],
+        )
+        data_list.append(new_datum)
+
+    session = Session()
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+
+
+def populate_career_path():
+    data_list = []
+    session = Session()
+    politician_ids = cv_json_file_numbers_generator()
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        steps = json_file["Biography"]["Steps"]
+        if steps != None:
+            row = session.query(CV).filter(CV.politician_id == politician_id).first()
+            cv_id = row.id
+            for step in steps:
+                new_datum = CareerPath(
+                    cv_id=cv_id,
+                    raw_text=step["Raw"],
+                    label=step["Label"],
+                    period=step["Date"],
+                )
+                data_list.append(new_datum)
+
+    session.add_all(data_list)
     session.commit()
     session.close()
 
