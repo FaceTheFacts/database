@@ -1016,23 +1016,28 @@ class FieldRelatedLink(Base):
     poll = relationship("Poll", back_populates="field_related_links")
 
 
-def populate_field_related_link():
-    data_list = []
-    data = json_fetch("poll")
-    for datum in data:
-        id = datum["id"]
-        field_related_links = datum.get("field_related_links")
-        if field_related_links != None:
+def populate_field_related_link() -> None:
+    api_polls = load_entity("polls")
+    poll_related_links = []
+    for api_poll in api_polls:
+        poll_id = api_poll["id"]
+        field_related_links = api_poll["field_related_links"]
+        if field_related_links:
             for field_related_link in field_related_links:
-                new_datum = FieldRelatedLink(
-                    poll_id=id,
-                    uri=field_related_link["uri"],
-                    title=field_related_link["title"],
-                )
-                data_list.append(new_datum)
-    session.add_all(data_list)
+                poll_related_link = {
+                    "poll_id": poll_id,
+                    "uri": field_related_link["uri"],
+                    "title": field_related_link["title"],
+                }
+                poll_related_links.append(poll_related_link)
+    session = Session()
+    stmt = insert(FieldRelatedLink).values(poll_related_links)
+    stmt = stmt.on_conflict_do_update(
+        constraint="field_related_link_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1395,6 +1400,7 @@ if __name__ == "__main__":
     # populate_committee_memberships()
     # populate_polls()
     # populate_poll_has_topic()
+    # populate_field_related_link()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
