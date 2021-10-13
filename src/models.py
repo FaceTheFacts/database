@@ -1059,46 +1059,44 @@ class Vote(Base):
     poll = relationship("Poll", back_populates="votes")
 
 
-def poll_ids_list_generator():
-    data_list = []
-    data = json_fetch("poll")
-    for datum in data:
-        data_list.append(datum["id"])
-    return list(set(data_list))
+def populate_votes():
+    api_polls = load_entity("polls")
+    poll_ids = set([api_poll["id"] for api_poll in api_polls])
+    api_votes = load_entity("votes")
+    begin_time = time.time()
+    votes = []
+    for api_vote in api_votes:
+        poll_id = api_vote["poll"]["id"] if api_vote["poll"] else None
+        if poll_id in poll_ids:
 
-
-def populate_vote():
-    begin = time.time()
-    data_list = []
-    missing_list = []
-    data = json_fetch("vote")
-    poll_id_list = poll_ids_list_generator()
-    for datum in data:
-        poll_id = datum["poll"]["id"] if datum["poll"] else None
-        is_exist_poll_id = poll_id in poll_id_list
-        if is_exist_poll_id:
-            new_datum = Vote(
-                id=datum["id"],
-                entity_type=datum["entity_type"],
-                label=datum["label"],
-                api_url=datum["api_url"],
-                mandate_id=datum["mandate"]["id"] if datum["mandate"] else None,
-                fraction_id=datum["fraction"]["id"] if datum["fraction"] else None,
-                poll_id=poll_id,
-                vote=datum["vote"],
-                reason_no_show=datum["reason_no_show"],
-                reason_no_show_other=datum["reason_no_show_other"],
-            )
-            data_list.append(new_datum)
-        else:
-            missing_list.append(datum)
-    json_generator(missing_list, "no_poll_id_vote")
-    session.add_all(data_list)
+            vote = {
+                "id": api_vote["id"],
+                "entity_type": api_vote["entity_type"],
+                "label": api_vote["label"],
+                "api_url": api_vote["api_url"],
+                "mandate_id": api_vote["mandate"]["id"]
+                if api_vote["mandate"]
+                else None,
+                "fraction_id": api_vote["fraction"]["id"]
+                if api_vote["fraction"]
+                else None,
+                "poll_id": poll_id,
+                "vote": api_vote["vote"],
+                "reason_no_show": api_vote["reason_no_show"],
+                "reason_no_show_other": api_vote["reason_no_show_other"],
+            }
+            votes.append(vote)
+    session = Session()
+    stmt = insert(Vote).values(votes)
+    stmt = stmt.on_conflict_do_update(
+        constraint="vote_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
-    end = time.time()
-    print(f"Total runtime to store {len(data_list)} data is {end - begin}")
+    end_time = time.time()
+    print(f"Total runtime to store {len(api_votes)} data is {end_time - begin_time}")
 
 
 class SidejobOrganization(Base):
@@ -1401,6 +1399,7 @@ if __name__ == "__main__":
     # populate_polls()
     # populate_poll_has_topic()
     # populate_field_related_link()
+    # populate_votes()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
