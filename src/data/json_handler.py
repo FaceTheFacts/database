@@ -23,14 +23,22 @@ def json_fetch(file_name: str) -> any:
     return data
 
 
+def cv_json_fetch(file_name: str) -> any:
+    BASE_PATH = "src/data/json/cv/"
+    selected_path = BASE_PATH + file_name + ".json"
+    with open(selected_path) as read_file:
+        data = json.load(read_file)
+    return data
+
+
 def cv_json_file_numbers_generator():
     number_list = []
     path = "src/data/json/cv"
     files = os.listdir(path)
     for file in files:
         number_list.append(int(file.replace(".json", "")))
-    number_list
+    return number_list
 
 
 if __name__ == "__main__":
-    cv_json_file_numbers_generator()
+    print(cv_json_file_numbers_generator())
