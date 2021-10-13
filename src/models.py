@@ -1255,9 +1255,11 @@ class CV(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     politician_id = Column(Integer, ForeignKey("politician.id"))
     raw_text = Column(String)
-    short_description = Column(Text)
+    short_description = Column(String)
     # Many to One
     politician = relationship("Politician", back_populates="cvs")
+    # One to Many
+    career_paths = relationship("CareerPath", back_populates="cv")
 
 
 def populate_cv():
@@ -1270,41 +1272,50 @@ def populate_cv():
         new_datum = CV(
             politician_id=politician_id,
             raw_text=bio["Raw"],
-            short_description=bio["ShortDescription"]
+            short_description=bio["ShortDescription"],
         )
         data_list.append(new_datum)
-        
+
         # if type(steps) !=list:
         #     print(politician_id)
-            # for step in steps:
-            #     new_datum = CV(
-            #         politician_id=politician_id,
-            #         raw_text=step["Raw"],
-            #         label=step["Label"],
-            #         cv_date=step["Date"],
-            #     )
-            # data_list.append(new_datum)
-            # continue
+        # for step in steps:
+        #     new_datum = CV(
+        #         politician_id=politician_id,
+        #         raw_text=step["Raw"],
+        #         label=step["Label"],
+        #         cv_date=step["Date"],
+        #     )
+        # data_list.append(new_datum)
+        # continue
         # else:
-            # new_datum = CV(
-            #         politician_id=politician_id,
-            #         raw_text=steps["Raw"],
-            #         label=steps["Label"],
-            #         cv_date=steps["Date"],
-            #     )
-            # data_list.append(new_datum)
-            
-            # print(steps["Raw"])
-            # print(steps["Label"])
-            # print(steps["Date"])
+        # new_datum = CV(
+        #         politician_id=politician_id,
+        #         raw_text=steps["Raw"],
+        #         label=steps["Label"],
+        #         cv_date=steps["Date"],
+        #     )
+        # data_list.append(new_datum)
 
+        # print(steps["Raw"])
+        # print(steps["Label"])
+        # print(steps["Date"])
 
     session.add_all(data_list)
     session.commit()
     session.close()
 
 
+class CareerPath(Base):
+    __tablename__ = "career_path"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cv_id = Column(Integer, ForeignKey("cv.id"))
+    raw_text = Column(String)
+    label = Column(String)
+    period = Column(String)
+    # Many to One
+    cv = relationship("CV", back_populates="career_paths")
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    populate_cv()
