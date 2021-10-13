@@ -1073,7 +1073,6 @@ def populate_votes():
     for api_vote in api_votes:
         poll_id = api_vote["poll"]["id"] if api_vote["poll"] else None
         if poll_id in poll_ids:
-
             vote = {
                 "id": api_vote["id"],
                 "entity_type": api_vote["entity_type"],
@@ -1125,22 +1124,31 @@ class SidejobOrganization(Base):
     )
 
 
-def populate_sidejob_organization():
-    data_list = []
-    data = json_fetch("sidejob_organization_ids")
-    for datum in data:
-        new_datum = SidejobOrganization(
-            id=datum["id"],
-            entity_type=datum["entity_type"],
-            label=datum["label"],
-            api_url=datum["api_url"],
-            field_city_id=datum["field_city_id"],
-            field_country_id=datum["field_country_id"],
-        )
-        data_list.append(new_datum)
-    session.add_all(data_list)
+def populate_sidejob_organizations():
+    api_sidejob_organizations = load_entity("sidejob-organizations")
+    sidejob_organizations = [
+        {
+            "id": api_sidejob_organization["id"],
+            "entity_type": api_sidejob_organization["entity_type"],
+            "label": api_sidejob_organization["label"],
+            "api_url": api_sidejob_organization["api_url"],
+            "field_city_id": api_sidejob_organization["field_city"]["id"]
+            if api_sidejob_organization["field_city"]
+            else None,
+            "field_country_id": api_sidejob_organization["field_country"]["id"]
+            if api_sidejob_organization["field_country"]
+            else None,
+        }
+        for api_sidejob_organization in api_sidejob_organizations
+    ]
+    session = Session()
+    stmt = insert(SidejobOrganization).values(sidejob_organizations)
+    stmt = stmt.on_conflict_do_update(
+        constraint="sidejob_organization_pkey",
+        set_={col.name: col for col in stmt.excluded if not col.primary_key},
+    )
+    session.execute(stmt)
     session.commit()
-    print("Inserted {} data in total".format(len(data_list)))
     session.close()
 
 
@@ -1469,6 +1477,7 @@ if __name__ == "__main__":
     # populate_poll_has_topic()
     # populate_field_related_link()
     # populate_votes()
+    # populate_sidejob_organizations()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
