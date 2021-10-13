@@ -1276,30 +1276,6 @@ def populate_cv():
         )
         data_list.append(new_datum)
 
-        # if type(steps) !=list:
-        #     print(politician_id)
-        # for step in steps:
-        #     new_datum = CV(
-        #         politician_id=politician_id,
-        #         raw_text=step["Raw"],
-        #         label=step["Label"],
-        #         cv_date=step["Date"],
-        #     )
-        # data_list.append(new_datum)
-        # continue
-        # else:
-        # new_datum = CV(
-        #         politician_id=politician_id,
-        #         raw_text=steps["Raw"],
-        #         label=steps["Label"],
-        #         cv_date=steps["Date"],
-        #     )
-        # data_list.append(new_datum)
-
-        # print(steps["Raw"])
-        # print(steps["Label"])
-        # print(steps["Date"])
-
     session.add_all(data_list)
     session.commit()
     session.close()
@@ -1316,6 +1292,29 @@ class CareerPath(Base):
     cv = relationship("CV", back_populates="career_paths")
 
 
+def populate_career_path():
+    data_list = []
+    politician_ids = cv_json_file_numbers_generator()
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        steps = json_file["Biography"]["Steps"]
+        if steps != None:
+            row = session.query(CV).filter(CV.politician_id == politician_id).first()
+            cv_id = row.id
+            for step in steps:
+                new_datum = CareerPath(
+                    cv_id=cv_id,
+                    raw_text=step["Raw"],
+                    label=step["Label"],
+                    period=step["Date"],
+                )
+                data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
+    populate_career_path()
