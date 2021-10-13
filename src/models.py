@@ -1261,31 +1261,22 @@ class SidejobHasMandate(Base):
     )
 
 
-def generate_unique_sidejob_mandate():
-    data_list = []
-    data = json_fetch("sidejob")
-    for datum in data:
-        if datum["mandates"]:
-            for mandate in datum["mandates"]:
-                new_data = {
-                    "sidejob_id": datum["id"],
+def populate_sidejob_has_mandate() -> None:
+    api_sidejobs = load_entity("sidejobs")
+    sidejob_mandates = []
+    for api_sidejob in api_sidejobs:
+        mandates = api_sidejob["mandates"]
+        if mandates:
+            for mandate in mandates:
+                sidejob_mandate = {
+                    "sidejob_id": api_sidejob["id"],
                     "candidacy_mandate_id": mandate["id"],
                 }
-                data_list.append(new_data)
-    return [dict(t) for t in {tuple(d.items()) for d in data_list}]
-
-
-def populate_sidejob_has_mandate():
-    data_list = []
-    data = generate_unique_sidejob_mandate()
-    for datum in data:
-        new_datum = SidejobHasMandate(
-            sidejob_id=datum["sidejob_id"],
-            candidacy_mandate_id=datum["candidacy_mandate_id"],
-        )
-        data_list.append(new_datum)
-
-    session.add_all(data_list)
+                sidejob_mandates.append(sidejob_mandate)
+    stmt = insert(SidejobHasMandate).values(sidejob_mandates)
+    stmt = stmt.on_conflict_do_nothing()
+    session = Session()
+    session.execute(stmt)
     session.commit()
     session.close()
 
@@ -1491,7 +1482,8 @@ if __name__ == "__main__":
     # populate_votes()
     # populate_sidejob_organizations()
     # populate_sidejob_organization_has_topic()
-    populate_sidejobs()
+    # populate_sidejobs()
+    # populate_sidejob_has_mandate()
 
     # populate_vote()
     # PositionStatement.insert_position_statement()
