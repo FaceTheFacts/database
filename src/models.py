@@ -33,7 +33,12 @@ import json
 import sys
 
 sys.path.append("src")
-from data.json_handler import json_fetch, json_generator
+from data.json_handler import (
+    cv_json_fetch,
+    cv_json_file_numbers_generator,
+    json_fetch,
+    json_generator,
+)
 
 Base = declarative_base()
 session = Session()
@@ -152,6 +157,7 @@ class Politician(Base):
     # One to Many
     candidacy_mandates = relationship("Candidacy_mandate", back_populates="politician")
     positions = relationship("Position", back_populates="politician")
+    cvs = relationship("CV", back_populates="politician")
 
 
 def insert_politician(data: list):
@@ -1244,22 +1250,71 @@ class Position(Base):
             session.close()
 
 
+class CV(Base):
+    __tablename__ = "cv"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    politician_id = Column(Integer, ForeignKey("politician.id"))
+    raw_text = Column(String)
+    short_description = Column(String)
+    # Many to One
+    politician = relationship("Politician", back_populates="cvs")
+    # One to Many
+    career_paths = relationship("CareerPath", back_populates="cv")
+
+
+def populate_cv():
+    data_list = []
+    politician_ids = cv_json_file_numbers_generator()
+
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        bio = json_file["Biography"]
+        new_datum = CV(
+            politician_id=politician_id,
+            raw_text=bio["Raw"],
+            short_description=bio["ShortDescription"],
+        )
+        data_list.append(new_datum)
+
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+
+
+class CareerPath(Base):
+    __tablename__ = "career_path"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    cv_id = Column(Integer, ForeignKey("cv.id"))
+    raw_text = Column(String)
+    label = Column(String)
+    period = Column(String)
+    # Many to One
+    cv = relationship("CV", back_populates="career_paths")
+
+
+def populate_career_path():
+    data_list = []
+    politician_ids = cv_json_file_numbers_generator()
+    for politician_id in politician_ids:
+        json_file = cv_json_fetch("{}".format(politician_id))
+        steps = json_file["Biography"]["Steps"]
+        if steps != None:
+            row = session.query(CV).filter(CV.politician_id == politician_id).first()
+            cv_id = row.id
+            for step in steps:
+                new_datum = CareerPath(
+                    cv_id=cv_id,
+                    raw_text=step["Raw"],
+                    label=step["Label"],
+                    period=step["Date"],
+                )
+                data_list.append(new_datum)
+    session.add_all(data_list)
+    session.commit()
+    session.close()
+
+
 if __name__ == "__main__":
     # Migration =>Table creation
     Base.metadata.create_all(engine)
-    # populate_vote()
-    # PositionStatement.insert_position_statement()
-    # Position.insert_position()
-    # Position_statement.insert_position_statement()
-    # Topic.insert_topic(topic_fetch())
-    # Topic.update_parent_id(topic_fetch())
-    # Committee.insert_committee(committee_fetch())
-    # Committee_has_topic.insert_committee_has_topic(committee_fetch())
-    # insert_country(country_fetch())
-    # insert_city(city_fetch())
-    # insert_party(party_fetch())
-    # insert_politician(politician_fetch())
-    # insert_parliament_period(parliament_period_fetch())
-    # insert_parliament(parliament_fetch())
-    # update_previous_period_id(parliament_period_fetch())
-    # update_current_project_id(parliament_fetch())
+    populate_career_path()
