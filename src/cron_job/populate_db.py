@@ -3,7 +3,9 @@ from sqlalchemy.dialects.postgresql import insert
 
 from ..utils.file import read_json
 from ..utils.fetch import load_entity
+from ..db.base import Base
 from ..db.session import engine, Session
+from ..db.insert_and_update import insert_and_update
 
 from ..models.country import Country
 from ..models.city import City
@@ -52,15 +54,7 @@ def populate_countries() -> None:
         }
         for api_country in api_countries
     ]
-    session = Session()
-    stmt = insert(Country).values(countries)
-    stmt = stmt.on_conflict_do_update(
-        constraint="country_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Country, countries)
 
 
 def populate_cities() -> None:
@@ -74,15 +68,7 @@ def populate_cities() -> None:
         }
         for api_city in api_cities
     ]
-    session = Session()
-    stmt = insert(City).values(cities)
-    stmt = stmt.on_conflict_do_update(
-        constraint="city_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(City, cities)
 
 
 def populate_parties() -> None:
@@ -98,15 +84,7 @@ def populate_parties() -> None:
         }
         for api_party in api_parties
     ]
-    session = Session()
-    stmt = insert(Party).values(parties)
-    stmt = stmt.on_conflict_do_update(
-        constraint="party_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Party, parties)
 
 
 def populate_politicians() -> None:
@@ -142,15 +120,7 @@ def populate_politicians() -> None:
         }
         for api_politician in api_politicians
     ]
-    stmt = insert(Politician).values(politicians)
-    stmt = stmt.on_conflict_do_update(
-        constraint="politician_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Politician, politicians)
     end_time = time.time()
     print(
         f"Total runtime to store {len(api_politicians)} data is {end_time - begin_time}"
@@ -170,15 +140,7 @@ def populate_parliaments() -> None:
         }
         for api_parliament in api_parliaments
     ]
-    session = Session()
-    stmt = insert(Parliament).values(parliaments)
-    stmt = stmt.on_conflict_do_update(
-        constraint="parliament_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Parliament, parliaments)
 
 
 def update_parliament_current_project_ids() -> None:
@@ -227,17 +189,8 @@ def populate_parliament_periods() -> None:
         for api_parliament_period in api_parliament_periods
     ]
     parliament_periods = sorted(parliament_periods, key=lambda p: p["id"])
-    stmt = insert(ParliamentPeriod).values(parliament_periods)
-    stmt = stmt.on_conflict_do_update(
-        constraint="parliament_period_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-
+    insert_and_update(ParliamentPeriod, parliament_periods)
     update_parliament_current_project_ids()
-    session.close()
 
 
 def populate_topics() -> None:
@@ -255,15 +208,7 @@ def populate_topics() -> None:
         for api_topic in api_topics
     ]
     topics = sorted(topics, key=lambda t: t["id"])
-    stmt = insert(Topic).values(topics)
-    stmt = stmt.on_conflict_do_update(
-        constraint="topic_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Topic, topics)
 
 
 def populate_committees() -> None:
@@ -278,15 +223,7 @@ def populate_committees() -> None:
         }
         for api_committee in api_committees
     ]
-    stmt = insert(Committee).values(committees)
-    stmt = stmt.on_conflict_do_update(
-        constraint="committee_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Committee, committees)
 
 
 def populate_committee_has_topic() -> None:
@@ -325,15 +262,7 @@ def populate_fractions() -> None:
         }
         for api_fraction in api_fractions
     ]
-    stmt = insert(Fraction).values(fractions)
-    stmt = stmt.on_conflict_do_update(
-        constraint="fraction_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Fraction, fractions)
 
 
 def populate_constituencies() -> None:
@@ -349,15 +278,7 @@ def populate_constituencies() -> None:
         }
         for api_constituency in api_constituencies
     ]
-    session = Session()
-    stmt = insert(Constituency).values(constituencies)
-    stmt = stmt.on_conflict_do_update(
-        constraint="constituency_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Constituency, constituencies)
 
 
 def populate_electoral_lists() -> None:
@@ -375,44 +296,7 @@ def populate_electoral_lists() -> None:
         }
         for api_electoral_list in api_electoral_lists
     ]
-    session = Session()
-    stmt = insert(ElectoralList).values(electoral_lists)
-    stmt = stmt.on_conflict_do_update(
-        constraint="electoral_list_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
-
-
-# def link_length_checker_election_program():
-#     data_list = []
-#     data = load_entity("election-program")
-#     length_of_data = len(data)
-#     for datum in data:
-#         link = datum["link"]
-#         length_of_link = len(link)
-#         if length_of_link != 1:
-#             data_list.append(datum)
-
-#     print("Fetched {} data in total".format(length_of_data))
-#     print("{} has multiple links".format(data_list))
-
-
-# def link_checker_election_program():
-#     data_list = []
-#     data = load_entity("election-program")
-#     length_of_data = len(data)
-#     for datum in data:
-#         id = datum["id"]
-#         link = datum["link"]
-#         uri = link[0]["uri"]
-#         if uri != None:
-#             hasUrl = {"id": id, "uri": uri}
-#             data_list.append(hasUrl)
-#     print("Fetched {} data in total".format(length_of_data))
-#     print("{} in total have uris".format(len(data_list)))
+    insert_and_update(ElectoralList, electoral_lists)
 
 
 def populate_election_programs() -> None:
@@ -438,15 +322,7 @@ def populate_election_programs() -> None:
         }
         for api_election_program in api_election_programs
     ]
-    stmt = insert(ElectionProgram).values(election_programs)
-    stmt = stmt.on_conflict_do_update(
-        constraint="election_program_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(ElectionProgram, election_programs)
 
 
 def populate_fraction_memberships() -> None:
@@ -465,15 +341,7 @@ def populate_fraction_memberships() -> None:
                 "valid_until": membership["valid_until"],
             }
             fraction_memberships.append(new_fraction_membership)
-    session = Session()
-    stmt = insert(FractionMembership).values(fraction_memberships)
-    stmt = stmt.on_conflict_do_update(
-        constraint="fraction_membership_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(FractionMembership, fraction_memberships)
 
 
 def populate_electoral_data() -> None:
@@ -500,15 +368,7 @@ def populate_electoral_data() -> None:
                 "mandate_won": electoral_data["mandate_won"],
             }
             electoral_data_list.append(new_electoral_data)
-    session = Session()
-    stmt = insert(ElectoralData).values(electoral_data_list)
-    stmt = stmt.on_conflict_do_update(
-        constraint="electoral_data_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(ElectoralData, electoral_data_list)
 
 
 def populate_candidacies_mandates() -> None:
@@ -552,15 +412,7 @@ def populate_candidacies_mandates() -> None:
         }
         for api_candidacies_mandate in api_candidacies_mandates
     ]
-    session = Session()
-    stmt = insert(CandidacyMandate).values(candidacies_mandates)
-    stmt = stmt.on_conflict_do_update(
-        constraint="candidacy_mandate_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(CandidacyMandate, candidacies_mandates)
     end_time = time.time()
     print(
         f"Total runtime to store {len(candidacies_mandates)} data is {end_time - begin_time}"
@@ -596,15 +448,7 @@ def populate_committee_memberships() -> None:
                 "committee_role": api_committee_membership["committee_role"],
             }
             committee_memberships.append(new_membership)
-    session = Session()
-    stmt = insert(CommitteeMembership).values(committee_memberships)
-    stmt = stmt.on_conflict_do_update(
-        constraint="committee_membership_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(CommitteeMembership, committee_memberships)
     end_time = time.time()
     print(
         f"Total runtime to store {len(committee_memberships)} data is {end_time - begin_time}"
@@ -630,15 +474,7 @@ def populate_polls() -> None:
         }
         for api_polls in api_polls
     ]
-    session = Session()
-    stmt = insert(Poll).values(polls)
-    stmt = stmt.on_conflict_do_update(
-        constraint="poll_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Poll, polls)
 
 
 def populate_poll_has_topic() -> None:
@@ -675,15 +511,7 @@ def populate_field_related_link() -> None:
                     "title": field_related_link["title"],
                 }
                 poll_related_links.append(poll_related_link)
-    session = Session()
-    stmt = insert(FieldRelatedLink).values(poll_related_links)
-    stmt = stmt.on_conflict_do_update(
-        constraint="field_related_link_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(FieldRelatedLink, poll_related_links)
 
 
 def populate_votes() -> None:
@@ -712,15 +540,7 @@ def populate_votes() -> None:
                 "reason_no_show_other": api_vote["reason_no_show_other"],
             }
             votes.append(vote)
-    session = Session()
-    stmt = insert(Vote).values(votes)
-    stmt = stmt.on_conflict_do_update(
-        constraint="vote_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Vote, votes)
     end_time = time.time()
     print(f"Total runtime to store {len(api_votes)} data is {end_time - begin_time}")
 
@@ -742,15 +562,7 @@ def populate_sidejob_organizations() -> None:
         }
         for api_sidejob_organization in api_sidejob_organizations
     ]
-    session = Session()
-    stmt = insert(SidejobOrganization).values(sidejob_organizations)
-    stmt = stmt.on_conflict_do_update(
-        constraint="sidejob_organization_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(SidejobOrganization, sidejob_organizations)
 
 
 def populate_sidejob_organization_has_topic() -> None:
@@ -800,15 +612,7 @@ def populate_sidejobs() -> None:
         }
         for api_sidejob in api_sidejobs
     ]
-    session = Session()
-    stmt = insert(Sidejob).values(sidejobs)
-    stmt = stmt.on_conflict_do_update(
-        constraint="sidejob_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(Sidejob, sidejobs)
 
 
 def populate_sidejob_has_mandate() -> None:
@@ -865,15 +669,7 @@ def populate_position_statements() -> None:
             "topic_id": assumption["topic"],
         }
         statements.append(statement)
-    stmt = insert(PositionStatement).values(statements)
-    stmt = stmt.on_conflict_do_update(
-        constraint="position_statement_pkey",
-        set_={col.name: col for col in stmt.excluded if not col.primary_key},
-    )
-    session = Session()
-    session.execute(stmt)
-    session.commit()
-    session.close()
+    insert_and_update(PositionStatement, statements)
 
 
 def insert_position():
@@ -954,12 +750,12 @@ def populate_career_path():
 
 
 if __name__ == "__main__":
+    Base.metadata.create_all(engine)
     # populate_countries()
     # populate_cities()
     # populate_parties()
     # populate_politicians()
     # populate_parliaments()
-    # update_parliament_current_project_ids()
     # populate_parliament_periods()
     # populate_topics()
     # populate_committees()
@@ -981,4 +777,4 @@ if __name__ == "__main__":
     # populate_sidejobs()
     # populate_sidejob_has_mandate()
     # populate_sidejob_has_topic()
-    populate_position_statements()
+    # populate_position_statements()
