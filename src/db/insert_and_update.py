@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import insert
 from ..db.session import Session
 
 
-def upsert(model: Any, data: list[Any]) -> None:
+def insert_and_update(model: Any, data: list[Any]) -> None:
     session = Session()
     stmt = insert(model).values(data)
     stmt = stmt.on_conflict_do_update(
