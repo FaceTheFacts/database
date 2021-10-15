@@ -5,10 +5,10 @@ from ..utils.file import read_json
 from ..utils.fetch import load_entity
 from ..db.base import Base
 from ..db.session import engine, Session
-from ..db.insert_and_update import insert_and_update
 
 from ..models.country import Country
 from ..models.city import City
+from ..models.party_style import PartyStyle
 from ..models.party import Party
 from ..models.politician import Politician
 from ..models.parliament import Parliament
@@ -35,6 +35,8 @@ from ..models.sidejob_has_mandate import SidejobHasMandate
 from ..models.sidejob_has_topic import SidejobHasTopic
 from ..models.position_statement import PositionStatement
 
+from .utils.gen_party_styles_map import gen_party_styles_map
+from .utils.insert_and_update import insert_and_update
 
 import json
 from ..models.position import Position
@@ -71,6 +73,26 @@ def populate_cities() -> None:
     insert_and_update(City, cities)
 
 
+def populate_party_styles() -> None:
+    api_parties = load_entity("parties")
+    party_styles_map = gen_party_styles_map(api_parties)
+    party_styles = []
+    for api_party in api_parties:
+        party_id: int = api_party["id"]
+        if party_id in party_styles_map:
+            party_styles.append(party_styles_map[party_id])
+        else:
+            party_style = {
+                "id": party_id,
+                "display_name": api_party["label"],
+                "foreground_color": "#FFFFFF",
+                "background_color": "#333333",
+                "border_color": None,
+            }
+            party_styles.append(party_style)
+    insert_and_update(PartyStyle, party_styles)
+
+
 def populate_parties() -> None:
     api_parties = load_entity("parties")
     parties = [
@@ -81,6 +103,7 @@ def populate_parties() -> None:
             "api_url": api_party["api_url"],
             "full_name": api_party["full_name"],
             "short_name": api_party["short_name"],
+            "party_style_id": api_party["id"],
         }
         for api_party in api_parties
     ]
@@ -655,6 +678,7 @@ def populate_sidejob_has_topic() -> None:
     session.close()
 
 
+# berlin -> 129
 def populate_position_statements() -> None:
     # parliament period needs to match the assumptions of the state
     PARLIAMENT_PERIOD = "130"
@@ -670,6 +694,9 @@ def populate_position_statements() -> None:
         }
         statements.append(statement)
     insert_and_update(PositionStatement, statements)
+
+
+lookup = {"general": 128, "berlin": 129, "mecklenburg-vorpommern": 130}
 
 
 def insert_position():
@@ -753,7 +780,8 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     # populate_countries()
     # populate_cities()
-    # populate_parties()
+    populate_party_styles()
+    populate_parties()
     # populate_politicians()
     # populate_parliaments()
     # populate_parliament_periods()
