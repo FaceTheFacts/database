@@ -34,3 +34,4 @@ class Politician(Base):
     candidacy_mandates = relationship("CandidacyMandate", back_populates="politician")
     positions = relationship("Position", back_populates="politicians")
     cvs = relationship("CV", back_populates="politician")
+    weblinks = relationship("PoliticianWeblink", back_populates="politician")

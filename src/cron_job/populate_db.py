@@ -37,6 +37,7 @@ from ..models.position_statement import PositionStatement
 from ..models.cv import CV
 from ..models.career_path import CareerPath
 from ..models.position import Position
+from ..models.politician_weblink import PoliticianWeblink
 
 from .utils.gen_party_styles_map import gen_party_styles_map
 from .utils.insert_and_update import insert_and_update
@@ -47,7 +48,6 @@ from .utils.gen_position_statements import (
 )
 
 
-import json
 
 
 def populate_countries() -> None:
@@ -725,6 +725,21 @@ def populate_cvs_and_career_paths() -> None:
     insert_and_update(CareerPath, career_paths)
 
 
+def populate_weblinks() -> None:
+    cv_data = read_json("src/static/cvs.json")
+    weblinks = []
+    for politician_id in cv_data:
+        links = cv_data[politician_id].get("Links")
+        if links:
+            for link in links:
+                weblink = {
+                    "politician_id": politician_id,
+                    "link": link,
+                }
+                weblinks.append(weblink)
+    insert_and_update(PoliticianWeblink, weblinks)
+
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     # populate_countries()
@@ -757,3 +772,4 @@ if __name__ == "__main__":
     # populate_position_statements()
     # populate_positions()
     # populate_cvs_and_career_paths()
+    # populate_weblinks()
