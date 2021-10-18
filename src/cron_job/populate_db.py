@@ -40,7 +40,14 @@ from ..models.position import Position
 
 from .utils.gen_party_styles_map import gen_party_styles_map
 from .utils.insert_and_update import insert_and_update
-from .utils.gen_statements import gen_statements, PERIOD_POSITION_TABLE
+from .utils.gen_position_statements import (
+    gen_statements,
+    gen_positions,
+    PERIOD_POSITION_TABLE,
+)
+
+
+import json
 
 
 def populate_countries() -> None:
@@ -684,37 +691,9 @@ def populate_position_statements() -> None:
     insert_and_update(PositionStatement, position_statements)
 
 
-# def insert_position():
-#     data_list = []
-#     # parliament period needs to match the assumptions of the state
-#     parliament_period = "130"
-#     # add json file with the assumptions to the src directory
-#     file = "src/mecklenburg-vorpommern-positions.json"
-#     with open(file) as f:
-#         data = json.load(f)
-#         for politician in data:
-#             for position_data in data[politician]:
-#                 pk_id = (
-#                     parliament_period
-#                     + str(politician)
-#                     + str(list(position_data.keys())[0])
-#                 )
-#                 fk_id = parliament_period + str(list(position_data.keys())[0])
-#                 newData = Position(
-#                     id=int(pk_id),
-#                     position=position_data[list(position_data.keys())[0]]["position"],
-#                     reason=position_data[list(position_data.keys())[0]]["reason"]
-#                     if "reason" in position_data[list(position_data.keys())[0]]
-#                     else None,
-#                     politician_id=int(politician),
-#                     parliament_period_id=int(parliament_period),
-#                     position_statement_id=int(fk_id),
-#                 )
-#                 data_list.append(newData)
-#         session = Session()
-#         session.add_all(data_list)
-#         session.commit()
-#         session.close()
+def populate_positions() -> None:
+    positions = gen_positions(130)
+    insert_and_update(Position, positions)
 
 
 def populate_cvs_and_career_paths() -> None:
@@ -776,5 +755,5 @@ if __name__ == "__main__":
     # populate_sidejob_has_mandate()
     # populate_sidejob_has_topic()
     # populate_position_statements()
-    populate_cvs_and_career_paths()
-    # populate_career_paths()
+    # populate_positions()
+    # populate_cvs_and_career_paths()
