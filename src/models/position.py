@@ -14,6 +14,7 @@ class Position(Base):
     politician_id = Column(Integer, ForeignKey("politician.id"))
     parliament_period_id = Column(Integer, ForeignKey("parliament_period.id"))
     position_statement_id = Column(Integer, ForeignKey("position_statement.id"))
-    politician = relationship("Politician", back_populates="positions")
-    parliament_periods = relationship("Parliament_period", back_populates="positions")
-    position_statements = relationship("Position_statement", back_populates="positions")
+
+    politicians = relationship("Politician", back_populates="positions")
+    parliament_periods = relationship("ParliamentPeriod", back_populates="positions")
+    position_statements = relationship("PositionStatement", back_populates="positions")

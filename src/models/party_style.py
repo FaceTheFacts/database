@@ -15,5 +15,5 @@ class PartyStyle(Base):
     background_color = Column(String)
     border_color = Column(String)
 
-    # One to One
-    party = relationship("Party", back_populates="party_style")
+    # # One to One
+    # party = relationship("Party", back_populates="party")
