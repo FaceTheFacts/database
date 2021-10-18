@@ -720,24 +720,18 @@ def insert_position():
         session.close()
 
 
-def populate_cv():
-    data_list = []
-    politician_ids = cv_json_file_numbers_generator()
-
-    for politician_id in politician_ids:
-        json_file = cv_json_fetch("{}".format(politician_id))
-        bio = json_file["Biography"]
-        new_datum = CV(
-            politician_id=politician_id,
-            raw_text=bio["Raw"],
-            short_description=bio["ShortDescription"],
-        )
-        data_list.append(new_datum)
-
-    session = Session()
-    session.add_all(data_list)
-    session.commit()
-    session.close()
+def populate_cvs() -> None:
+    cv_data = read_json("src/static/cvs.json")
+    cvs = []
+    for politician_id in cv_data:
+        bio = cv_data[politician_id]["Biography"]
+        cv = {
+            "politician_id": politician_id,
+            "raw_text": bio["Raw"],
+            "short_description": bio["ShortDescription"],
+        }
+        cvs.append(cv)
+    insert_and_update(CV, cvs)
 
 
 def populate_career_path():
@@ -794,3 +788,4 @@ if __name__ == "__main__":
     # populate_sidejob_has_mandate()
     # populate_sidejob_has_topic()
     # populate_position_statements()
+    # populate_cvs()
