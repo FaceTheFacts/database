@@ -39,15 +39,13 @@ from ..models.career_path import CareerPath
 from ..models.position import Position
 from ..models.politician_weblink import PoliticianWeblink
 
-from .utils.gen_party_styles_map import gen_party_styles_map
 from .utils.insert_and_update import insert_and_update
-from .utils.gen_position_statements import (
+from .utils.parser import (
     gen_statements,
     gen_positions,
+    gen_party_styles_map,
     PERIOD_POSITION_TABLE,
 )
-
-
 
 
 def populate_countries() -> None:
