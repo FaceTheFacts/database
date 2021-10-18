@@ -37,6 +37,7 @@ from ..models.position_statement import PositionStatement
 
 from .utils.gen_party_styles_map import gen_party_styles_map
 from .utils.insert_and_update import insert_and_update
+from .utils.gen_statements import gen_statements, PERIOD_POSITION_TABLE
 
 import json
 from ..models.position import Position
@@ -678,25 +679,12 @@ def populate_sidejob_has_topic() -> None:
     session.close()
 
 
-# berlin -> 129
 def populate_position_statements() -> None:
-    # parliament period needs to match the assumptions of the state
-    PARLIAMENT_PERIOD = "130"
-    file_path = "src/static/mecklenburg-vorpommern-assumptions.json"
-    assumptions = read_json(file_path)
-    statements = []
-    for assumption in assumptions:
-        statement_id = PARLIAMENT_PERIOD + str(assumption["number"])
-        statement = {
-            "id": int(statement_id),
-            "statement": assumption["text"],
-            "topic_id": assumption["topic"],
-        }
-        statements.append(statement)
-    insert_and_update(PositionStatement, statements)
-
-
-lookup = {"general": 128, "berlin": 129, "mecklenburg-vorpommern": 130}
+    position_statements = []
+    for period_id in PERIOD_POSITION_TABLE:
+        statements = gen_statements(period_id)
+        position_statements += statements
+    insert_and_update(PositionStatement, position_statements)
 
 
 def insert_position():
@@ -780,8 +768,8 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     # populate_countries()
     # populate_cities()
-    populate_party_styles()
-    populate_parties()
+    # populate_party_styles()
+    # populate_parties()
     # populate_politicians()
     # populate_parliaments()
     # populate_parliament_periods()

@@ -1,6 +1,6 @@
 from typing import Any
 from sqlalchemy.dialects.postgresql import insert
-from ..db.session import Session
+from ...db.session import Session
 
 
 def insert_and_update(model: Any, data: list[Any]) -> None:
