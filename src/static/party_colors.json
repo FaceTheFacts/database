@@ -1,0 +1,107 @@
+[
+  {
+    "id": "none",
+    "displayName": "Fraktionslos",
+    "foregroundColor": "black",
+    "backgroundColor": "#F8F8F8"
+  },
+  {
+    "id": "cdu",
+    "displayName": "CDU",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#636363"
+  },
+  {
+    "id": "csu",
+    "displayName": "CSU",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#0D6CB4",
+    "borderColor": "#F8F8F8"
+  },
+  {
+    "id": "spd",
+    "displayName": "SPD",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#E95050"
+  },
+  {
+    "id": "fdp",
+    "displayName": "FDP",
+    "foregroundColor": "#333333",
+    "backgroundColor": "#FAED0B"
+  },
+  {
+    "id": "gruene",
+    "displayName": "Grüne",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#61A056"
+  },
+  {
+    "id": "linke",
+    "displayName": "Linke",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#CD3E72"
+  },
+  {
+    "id": "afd",
+    "displayName": "AfD",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#3AA6F4"
+  },
+  {
+    "id": "bavaria",
+    "displayName": "Bayernpartei",
+    "foregroundColor": "#3AA6F4",
+    "backgroundColor": "#F8F8F8",
+    "borderColor": "#3AA6F4"
+  },
+  {
+    "id": "freie",
+    "displayName": "Freie Wähler",
+    "foregroundColor": "#2F5997",
+    "backgroundColor": "#F8F8F8",
+    "borderColor": "#FD820B"
+  },
+  {
+    "id": "piraten",
+    "displayName": "Piraten",
+    "foregroundColor": "#333333",
+    "backgroundColor": "#FFB430"
+  },
+  {
+    "id": "oedp",
+    "displayName": "ÖDP",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#FD820B"
+  },
+  {
+    "id": "die-partei",
+    "displayName": "Die Partei",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#722B2B"
+  },
+  {
+    "id": "tierschutzpartei",
+    "displayName": "Tierschutzpartei",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#2F5997"
+  },
+  {
+    "id": "rep",
+    "displayName": "REP",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#2F5997"
+  },
+  {
+    "id": "npd",
+    "displayName": "NPD",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#9D420F"
+  },
+  {
+    "id": "other",
+    "displayName": "Sonstige",
+    "foregroundColor": "#FFFFFF",
+    "backgroundColor": "#333333"
+  }
+]
