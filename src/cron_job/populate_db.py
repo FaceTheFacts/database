@@ -38,6 +38,7 @@ from ..models.cv import CV
 from ..models.career_path import CareerPath
 from ..models.position import Position
 from ..models.politician_weblink import PoliticianWeblink
+from ..models.zip_code import ZipCode
 
 from .utils.insert_and_update import insert_and_update
 from .utils.parser import (
@@ -740,6 +741,22 @@ def populate_weblinks() -> None:
                 weblinks.append(weblink)
     insert_and_update(PoliticianWeblink, weblinks)
 
+def populate_zip_codes() -> None:
+    zip_code_data = read_json("src/static/cons.json")
+    zip_codes = []
+    zip_code_id = 1
+    for constituency in zip_code_data:
+        if "zipCodes" in constituency:
+            for zipCode in constituency["zipCodes"]:
+                zipCodeEntry = {
+                    "id": zip_code_id,
+                    "constituency_id": int(constituency["id"]),
+                    "zip_code": int(zipCode),
+                }
+                zip_code_id += 1
+                zip_codes.append(zipCodeEntry)
+    insert_and_update(ZipCode, zip_codes)    
+
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
@@ -771,6 +788,7 @@ if __name__ == "__main__":
     # populate_sidejob_has_mandate()
     # populate_sidejob_has_topic()
     # populate_position_statements()
-    populate_positions()
+    # populate_positions()
+    populate_zip_codes()
     # populate_cvs_and_career_paths()
     # populate_weblinks()
