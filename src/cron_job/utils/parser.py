@@ -1,5 +1,8 @@
 from typing import TypedDict, Optional, Any
 from ...utils.file import read_json
+from ...utils.fetch import load_entity
+from ...db.session import Session
+from ...models.politician import Politician
 
 LEFT = "Linke"
 GREEN = "Grüne"
@@ -84,21 +87,26 @@ def gen_statements(period_id: int) -> list[Statement]:
 def gen_positions(period_id: int) -> list[Position]:
     file_path = f"src/static/{PERIOD_POSITION_TABLE[period_id]}-positions.json"
     position_data = read_json(file_path)
+    api_politicians = load_entity("politicians")
+    politician_ids: set[int] = set([politician["id"] for politician in api_politicians])
     positions: list[Position] = []
     for politician_id in position_data:
-        for item in position_data[politician_id]:
-            assumption_id: str = str(next(iter(item)))
-            position_id = str(period_id) + str(politician_id) + assumption_id
-            statement_id = str(period_id) + assumption_id
-            position: Position = {
-                "id": int(position_id),
-                "position": item[assumption_id]["position"],
-                "reason": item[assumption_id]["reason"]
-                if "reason" in item[assumption_id]
-                else None,
-                "politician_id": int(politician_id),
-                "parliament_period_id": period_id,
-                "position_statement_id": int(statement_id),
-            }
-            positions.append(position)
+        if int(politician_id) not in politician_ids:
+            print(politician_id)
+        else:
+            for item in position_data[politician_id]:
+                assumption_id: str = str(next(iter(item)))
+                position_id = str(period_id) + str(politician_id) + assumption_id
+                statement_id = str(period_id) + assumption_id
+                position: Position = {
+                    "id": int(position_id),
+                    "position": item[assumption_id]["position"],
+                    "reason": item[assumption_id]["reason"]
+                    if "reason" in item[assumption_id]
+                    else None,
+                    "politician_id": int(politician_id),
+                    "parliament_period_id": period_id,
+                    "position_statement_id": int(statement_id),
+                }
+                positions.append(position)
     return positions

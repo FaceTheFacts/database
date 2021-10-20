@@ -690,8 +690,11 @@ def populate_position_statements() -> None:
 
 
 def populate_positions() -> None:
-    positions = gen_positions(130)
-    insert_and_update(Position, positions)
+    positions_list = []
+    for period_id in PERIOD_POSITION_TABLE:
+        positions = gen_positions(period_id)
+        positions_list += positions
+    insert_and_update(Position, positions_list)
 
 
 def populate_cvs_and_career_paths() -> None:
@@ -768,6 +771,6 @@ if __name__ == "__main__":
     # populate_sidejob_has_mandate()
     # populate_sidejob_has_topic()
     # populate_position_statements()
-    # populate_positions()
+    populate_positions()
     # populate_cvs_and_career_paths()
     # populate_weblinks()
