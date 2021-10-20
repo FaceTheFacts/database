@@ -741,21 +741,25 @@ def populate_weblinks() -> None:
                 weblinks.append(weblink)
     insert_and_update(PoliticianWeblink, weblinks)
 
+
 def populate_zip_codes() -> None:
     zip_code_data = read_json("src/static/cons.json")
     zip_codes = []
     zip_code_id = 1
     for constituency in zip_code_data:
         if "zipCodes" in constituency:
-            for zipCode in constituency["zipCodes"]:
-                zipCodeEntry = {
+            constituency_id = int(constituency["id"])
+            for zip_code in constituency["zipCodes"]:
+                if zip_code == "":
+                    continue
+                zip_code_entry = {
                     "id": zip_code_id,
-                    "constituency_id": int(constituency["id"]),
-                    "zip_code": int(zipCode),
+                    "constituency_id": constituency_id,
+                    "zip_code": zip_code,
                 }
                 zip_code_id += 1
-                zip_codes.append(zipCodeEntry)
-    insert_and_update(ZipCode, zip_codes)    
+                zip_codes.append(zip_code_entry)
+    insert_and_update(ZipCode, zip_codes)
 
 
 if __name__ == "__main__":
