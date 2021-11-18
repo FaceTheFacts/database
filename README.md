@@ -17,8 +17,7 @@ To run this project, you will need to add the following environment variables to
 `DATABASE_PASSWORD`
 
 `DATABASE_NAME`
-## Installation/ Run locally
-
+## Installation
 You'll need to configure the virtual environment and install dependencies.
 Ideally, Python 3.9.7:
 
